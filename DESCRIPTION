@@ -1,0 +1,20 @@
+Package: uxstats
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Author: Who wrote it
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: GPL-3
+Imports: stats,tidyverse,tidyselect, dplyr
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Collate: 
+    'laplace-function.R'
+    'mle-function.R'
+    'ux_mean-function.R'
+    'wald_ci-function.R'
+    'wilson-function.R'
+    'ux_success_rate-function.R'
