@@ -30,10 +30,20 @@ a tibble with one or more means
 For ratings data and other continuously distributed variables, \code{ratings_mean()} returns a mean, along with information about the confidence interval (based on the T distribution). You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds.
 }
 \examples{
-# Compare the difference between:
-ratings_mean(c(1,8,8))
-# and:
+
+# Compare the difference between the output of:
+ratings_mean(c(1,8,8)) # and:
+
 ratings_mean(c(1,8,8), .limits = c(1,8))
+
+mydata <-
+data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
+"ratings" = c(3,4,4.5,1,5,6,5.5,2,7,2,5,4),
+"group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
+"version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
+stringsAsFactors = FALSE)
+
+ratings_mean(mydata, ratings,group,.alpha=0.01,.limits=c(1,7))
 
 }
 \concept{means with confidence intervals}

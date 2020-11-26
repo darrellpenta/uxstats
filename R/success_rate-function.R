@@ -25,12 +25,14 @@
 #' # If you want a summary for a single task,
 #' # you can provide the number of successes
 #' # and trials to .x and .y, respectively:
+#'
 #' success_rate(15,20)
 #'
 #' # The alpha level defaults to .alpha=0.05.
 #' # You can provide your own alpha level
 #' # to .alpha by naming the argument
 #' # when you call the function:
+#'
 #' success_rate(15,20, .alpha = 0.01)
 #'
 #' # If you have a long-format data frame,
@@ -39,12 +41,14 @@
 #' # for a given task, you can pass the
 #' # data frame to .x and specify the name
 #' # of the task column:
+#'
 #' mydata <-
 #' data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
 #' "task1" = c(1,0,0,1,0,0,1,1,0,0,1,0),
 #' "group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
 #' "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
 #' stringsAsFactors = FALSE)
+#'
 #' success_rate(mydata, task1)
 #'
 #' # If you have one or more grouping variables,

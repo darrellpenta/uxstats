@@ -17,7 +17,21 @@
 #' @importFrom dplyr across
 #' @importFrom dplyr relocate
 #' @importFrom tidyselect any_of
-
+#' @examples
+#'
+#' # Compare the difference between the output of:
+#' ratings_mean(c(1,8,8)) # and:
+#'
+#' ratings_mean(c(1,8,8), .limits = c(1,8))
+#'
+#' mydata <-
+#' data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
+#' "ratings" = c(3,4,4.5,1,5,6,5.5,2,7,2,5,4),
+#' "group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
+#' "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
+#' stringsAsFactors = FALSE)
+#'
+#' ratings_mean(mydata, ratings,group,.alpha=0.01,.limits=c(1,7))
 #'
 #' @rdname ratings_mean
 #' @export
@@ -31,11 +45,7 @@ ratings_mean <- function(.data, ...) {
 #' @rdname ratings_mean
 #' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, or a 95\% confidence level.
 #' @param .limits (Optional) If you want to specify the end-points (limits) for the ratings scale, which will ensure that confidence interval values don't exceed the upper and lwoer bounds, you can supply a numeric vector of length two,indicating the limits (e.g., \code{.limits = c(1,7)}).
-#' @examples
-#' # Compare the difference between:
-#' ratings_mean(c(1,8,8))
-#' # and:
-#' ratings_mean(c(1,8,8), .limits = c(1,8))
+
 #'
 #' @export
 #'
