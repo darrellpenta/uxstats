@@ -1,13 +1,14 @@
 #' Compute a mean and confidence interval for continuously distributed data
 #'
-#' For ratings data and other continuously distributed variables, \code{ratings_mean()} returns a mean, along with information about the confidence interval (based on the T distribution). You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds.
+#' For ratings data and other continuously distributed variables, \code{ratings_mean()} returns a mean, along with information about the confidence interval (based on the T distribution). You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds. \code{NA} values are removed for computations.
 #' @param .data  A vector or long-format data frame of ratings or other continuous data.
 #' @param .var (Optional) The unquoted name of the data frame column containing the values to use in the computation.
 #' @param ... (Optional) The unquoted, comma-separated names of columns containing grouping variables.
-#' @return a tibble with one or more means
+#' @return A tibble with one or more means, confidence interval information, and other information.
 #' @family means with confidence intervals
 #' @importFrom stats qt
 #' @importFrom stats sd
+#' @importFrom stats median
 #' @importFrom dplyr n
 #' @importFrom dplyr filter
 #' @importFrom dplyr group_by
@@ -60,12 +61,13 @@ ratings_mean.numeric<-function(.data,...,.alpha = NULL,.limits=NULL){
   else {
     .p <- 1.0-(.alpha/2)
   }
-  .m<-mean(.data)
-  .sd<-stats::sd(.data)
+  .m<-mean(.data, na.rm = TRUE)
+  .sd<-stats::sd(.data, na.rm = TRUE)
   .n<-length(.data)
   .serr = (.sd/sqrt(.n))
   .tcrit = stats::qt(p=.p, df=(.n-1))
   .me = .tcrit * .serr
+  .median = stats::median(.data, na.rm = TRUE)
   .out<-
     data.frame(
       "mean" = .m,
@@ -73,10 +75,11 @@ ratings_mean.numeric<-function(.data,...,.alpha = NULL,.limits=NULL){
       "ci_hi" = .m+.me,
       "stdev" = .sd,
       "n" = .n,
-      "tcrit" = .tcrit
+      "tcrit" = .tcrit,
+      "median" = .median
     )
   .out<-
-    dplyr::mutate(.out, dplyr::across(tidyselect::any_of(c("ci_low","ci_hi","n","sd","serr","tcrit","me")), round,2))
+    dplyr::mutate(.out, dplyr::across(tidyselect::any_of(c("ci_low","ci_hi","n","sd","serr","tcrit","me", "median")), round,2))
 
   if(missing(.limits)){return(.out)}
   else if(length(.limits) != 2){

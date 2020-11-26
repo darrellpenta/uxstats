@@ -24,10 +24,10 @@ ratings_mean(.data, ...)
 \item{.var}{(Optional) The unquoted name of the data frame column containing the values to use in the computation.}
 }
 \value{
-a tibble with one or more means
+A tibble with one or more means, confidence interval information, and other information.
 }
 \description{
-For ratings data and other continuously distributed variables, \code{ratings_mean()} returns a mean, along with information about the confidence interval (based on the T distribution). You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds.
+For ratings data and other continuously distributed variables, \code{ratings_mean()} returns a mean, along with information about the confidence interval (based on the T distribution). You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds. \code{NA} values are removed for computations.
 }
 \examples{
 
