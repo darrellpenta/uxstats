@@ -27,16 +27,13 @@ ratings_mean(.data, ...)
 a tibble with one or more means
 }
 \description{
-For ratings data and other continuously distributed variables, \code{ratings_mean()} returns a mean, along with information about the confidence interval (based on the T distribution). You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust the confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds.
+For ratings data and other continuously distributed variables, \code{ratings_mean()} returns a mean, along with information about the confidence interval (based on the T distribution). You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds.
 }
 \examples{
 # Compare the difference between:
- ratings_mean(c(1,8,8))
-
- #and:
-
-  ratings_mean(c(1,8,8), .limits = c(1,8))
- @export
+ratings_mean(c(1,8,8))
+# and:
+ratings_mean(c(1,8,8), .limits = c(1,8))
 
 }
 \concept{means with confidence intervals}

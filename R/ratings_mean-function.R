@@ -33,12 +33,11 @@ ratings_mean <- function(.data, ...) {
 #' @param .limits (Optional) If you want to specify the end-points (limits) for the ratings scale, which will ensure that confidence interval values don't exceed the upper and lwoer bounds, you can supply a numeric vector of length two,indicating the limits (e.g., \code{.limits = c(1,7)}).
 #' @examples
 #' # Compare the difference between:
-#'  ratings_mean(c(1,8,8))
+#' ratings_mean(c(1,8,8))
+#' # and:
+#' ratings_mean(c(1,8,8), .limits = c(1,8))
 #'
-#'  #and:
-#'
-#'   ratings_mean(c(1,8,8), .limits = c(1,8))
-#'  @export
+#' @export
 #'
 ratings_mean.numeric<-function(.data,...,.alpha = NULL,.limits=NULL){
 
