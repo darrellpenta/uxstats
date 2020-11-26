@@ -14,7 +14,7 @@ RoxygenNote: 7.1.1
 Collate: 
     'laplace-function.R'
     'mle-function.R'
-    'ux_mean-function.R'
+    'ratings_mean-function.R'
     'wald_ci-function.R'
     'wilson-function.R'
-    'ux_success_rate-function.R'
+    'success_rate-function.R'
