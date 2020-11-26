@@ -1,6 +1,6 @@
-#' Compute a mean and confidence interval for continuously distributed data
+#' Compute stats for continuously distributed data
 #'
-#' For ratings data and other continuously distributed variables, \code{ratings_mean()} returns a mean, along with information about the confidence interval (based on the T distribution). You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds. \code{NA} values are removed for computations.
+#' For ratings data and other continuously distributed variables, \code{ratings_stats()} returns means;information about confidence intervals (based on the T distribution), standard deviations; medians; and other details. By defaults, \code{NA}s are removed from the data. You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds. \code{NA} values are removed for computations.
 #' @param .data  A vector or long-format data frame of ratings or other continuous data.
 #' @param .var (Optional) The unquoted name of the data frame column containing the values to use in the computation.
 #' @param ... (Optional) The unquoted, comma-separated names of columns containing grouping variables.
@@ -21,9 +21,9 @@
 #' @examples
 #'
 #' # Compare the difference between the output of:
-#' ratings_mean(c(1,8,8)) # and:
+#' ratings_stats(c(1,8,8)) # and:
 #'
-#' ratings_mean(c(1,8,8), .limits = c(1,8))
+#' ratings_stats(c(1,8,8), .limits = c(1,8))
 #'
 #' mydata <-
 #' data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
@@ -32,25 +32,25 @@
 #' "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
 #' stringsAsFactors = FALSE)
 #'
-#' ratings_mean(mydata, ratings,group,.alpha=0.01,.limits=c(1,7))
+#' ratings_stats(mydata, ratings,group,.alpha=0.01,.limits=c(1,7))
 #'
-#' @rdname ratings_mean
+#' @rdname ratings_stats
 #' @export
 #'
 #'
-ratings_mean <- function(.data, ...) {
-  UseMethod("ratings_mean", .data)
+ratings_stats <- function(.data, ...) {
+  UseMethod("ratings_stats", .data)
 }
 
 
-#' @rdname ratings_mean
+#' @rdname ratings_stats
 #' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, or a 95\% confidence level.
 #' @param .limits (Optional) If you want to specify the end-points (limits) for the ratings scale, which will ensure that confidence interval values don't exceed the upper and lwoer bounds, you can supply a numeric vector of length two,indicating the limits (e.g., \code{.limits = c(1,7)}).
 
 #'
 #' @export
 #'
-ratings_mean.numeric<-function(.data,...,.alpha = NULL,.limits=NULL){
+ratings_stats.numeric<-function(.data,...,.alpha = NULL,.limits=NULL){
 
   if(missing(.alpha)){
     .p<-0.975
@@ -99,10 +99,10 @@ ratings_mean.numeric<-function(.data,...,.alpha = NULL,.limits=NULL){
 
 
 
-#' @rdname ratings_mean
+#' @rdname ratings_stats
 #' @export
 #'
-ratings_mean.data.frame <- function(.data,
+ratings_stats.data.frame <- function(.data,
                                .var,
                                ...,
                                .alpha = NULL,
