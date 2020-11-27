@@ -5,7 +5,7 @@
 \alias{completion_rate}
 \alias{success_rate.numeric}
 \alias{success_rate.data.frame}
-\title{Compute a task success (completion) rate with a confidence interval}
+\title{Compute stats for task success (completion) data}
 \usage{
 success_rate(.x, .y, ...)
 
@@ -47,7 +47,8 @@ success_rate(15,20, .alpha = 0.01)
 
 # If you have a long-format data frame,
 # where each row contains an individual's
-# success (as 1) or failure (as 0) values
+# data, and at least one column includes
+# success (as 1s) or failure (as 0s) values
 # for a given task, you can pass the
 # data frame to .x and specify the name
 # of the task column:
@@ -65,5 +66,9 @@ success_rate(mydata, task1)
 # you pass them to the ... argument:
 success_rate(mydata, task1, group, version, .alpha=0.1)
 
+}
+\seealso{
+Other success rate estimators: 
+\code{\link{problem_stats}()}
 }
 \concept{success rate estimators}

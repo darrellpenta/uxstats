@@ -1,4 +1,4 @@
-#' Compute a task success (completion) rate with a confidence interval
+#' Compute stats for task success (completion) data
 #'
 #' \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} describe various approaches for estimating success rates and generating confidence intervals when you're working with smaller sample sizes. \code{success_rate()} automatically determines which of several estimator adjustments is best suited to the data, and it returns a tibble with the original and adjusted success rates (as a percentage); a field to indicate which adjustment method was used; and information about the confidence interval. You can optionally include one or more grouping variables to compute success rates by groups, and modify the alpha level to adjust confidence intervals.
 #' `success_rate()` and `completion_rate()` are synonyms.
@@ -37,7 +37,8 @@
 #'
 #' # If you have a long-format data frame,
 #' # where each row contains an individual's
-#' # success (as 1) or failure (as 0) values
+#' # data, and at least one column includes
+#' # success (as 1s) or failure (as 0s) values
 #' # for a given task, you can pass the
 #' # data frame to .x and specify the name
 #' # of the task column:

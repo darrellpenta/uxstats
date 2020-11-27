@@ -14,8 +14,9 @@ RoxygenNote: 7.1.1
 Collate: 
     'laplace-function.R'
     'mle-function.R'
-    'ratings_stats-function.R'
     'wald_ci-function.R'
     'wilson-function.R'
+    'problem_stats-function.R'
+    'ratings_stats-function.R'
     'success_rate-function.R'
     'time_stats-function.R'
