@@ -1,4 +1,4 @@
-#' Compute stats for continuously distributed data
+#' Compute stats for ratings or continuously distributed data
 #'
 #' For ratings data and other continuously distributed variables, \code{ratings_stats()} returns means;information about confidence intervals (based on the T distribution), standard deviations; medians; and other details. By defaults, \code{NA}s are removed from the data. You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds. \code{NA} values are removed for computations.
 #' @param .data  A vector or long-format data frame of ratings or other continuous data.
@@ -16,8 +16,7 @@
 #' @importFrom dplyr summarise
 #' @importFrom dplyr mutate
 #' @importFrom dplyr across
-#' @importFrom dplyr relocate
-#' @importFrom tidyselect any_of
+#' @importFrom dplyr select
 #' @examples
 #'
 #' # Compare the difference between the output of:
@@ -64,10 +63,10 @@ ratings_stats.numeric<-function(.data,...,.alpha = NULL,.limits=NULL){
   .m<-mean(.data, na.rm = TRUE)
   .sd<-stats::sd(.data, na.rm = TRUE)
   .n<-length(.data)
-  .serr = (.sd/sqrt(.n))
-  .tcrit = stats::qt(p=.p, df=(.n-1))
-  .me = .tcrit * .serr
-  .median = stats::median(.data, na.rm = TRUE)
+  .stderr <- (.sd/sqrt(.n))
+  .tcrit <- stats::qt(p=.p, df=(.n-1))
+  .me <- .tcrit * .stderr
+  .median <- stats::median(.data, na.rm = TRUE)
   .out<-
     data.frame(
       "mean" = .m,
@@ -78,8 +77,6 @@ ratings_stats.numeric<-function(.data,...,.alpha = NULL,.limits=NULL){
       "tcrit" = .tcrit,
       "median" = .median
     )
-  .out<-
-    dplyr::mutate(.out, dplyr::across(tidyselect::any_of(c("ci_low","ci_hi","n","sd","serr","tcrit","me", "median")), round,2))
 
   if(missing(.limits)){return(.out)}
   else if(length(.limits) != 2){
@@ -120,23 +117,19 @@ ratings_stats.data.frame <- function(.data,
   .out<-
     dplyr::group_by(.data, ...)
   .out<-
-    dplyr::summarise(.out, mean = mean({{ .var }}),
-              sd = stats::sd({{ .var }}),
+    dplyr::summarise(.out, mean = mean({{ .var }}, na.rm=TRUE),
+              stdev = stats::sd({{ .var }}, na.rm = TRUE),
+              median = stats::median({{ .var }}, na.rm = TRUE),
               n = dplyr::n())
-  .out$serr<- (.out$sd/sqrt(.out$n))
+  .out$stderr<- (.out$stdev/sqrt(.out$n))
   .out$tcrit <- stats::qt(p=.p, df=(.out$n-1))
-  .out$me <- .out$tcrit * .out$serr
+  .out$me <- .out$tcrit * .out$stderr
   .out$ci_low <- .out$mean - .out$me
   .out$ci_hi <- .out$mean + .out$me
   .out<-
     dplyr::ungroup(.out)
-  .out<-
-    dplyr::relocate(.out,
-                    tidyselect::any_of(c("ci_low","ci_hi","n")), .after=mean)
 
-  .out<-
-    dplyr::mutate(.out, dplyr::across(tidyselect::any_of(c("ci_low","ci_hi","n","sd","serr","tcrit","me")), round,2))
-  if(missing(.limits)){return(.out)}
+   if(missing(.limits)){return(.out)}
   else if(length(.limits) != 2){
     stop(".limits should be a numeric vector of length 2; e.g., .limits=c(0,10)")
   }

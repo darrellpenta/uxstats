@@ -4,7 +4,7 @@
 \alias{ratings_stats}
 \alias{ratings_stats.numeric}
 \alias{ratings_stats.data.frame}
-\title{Compute stats for continuously distributed data}
+\title{Compute stats for ratings or continuously distributed data}
 \usage{
 ratings_stats(.data, ...)
 
@@ -45,5 +45,9 @@ stringsAsFactors = FALSE)
 
 ratings_stats(mydata, ratings,group,.alpha=0.01,.limits=c(1,7))
 
+}
+\seealso{
+Other means with confidence intervals: 
+\code{\link{time_stats}()}
 }
 \concept{means with confidence intervals}

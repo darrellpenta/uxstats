@@ -18,3 +18,4 @@ Collate:
     'wald_ci-function.R'
     'wilson-function.R'
     'success_rate-function.R'
+    'time_stats-function.R'
