@@ -1,7 +1,7 @@
 #' Compute stats for task success (completion) data
 #'
-#' \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} describe various approaches for estimating success rates and generating confidence intervals when you're working with smaller sample sizes. \code{success_rate()} automatically determines which of several estimator adjustments is best suited to the data, and it returns a tibble with the original and adjusted success rates (as a percentage); a field to indicate which adjustment method was used; and information about the confidence interval. You can optionally include one or more grouping variables to compute success rates by groups, and modify the alpha level to adjust confidence intervals.
-#' `success_rate()` and `completion_rate()` are synonyms.
+#' \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} describe various approaches for estimating success rates and generating confidence intervals when you're working with smaller sample sizes. \code{success_stats()} automatically determines which of several estimator adjustments is best suited to the data, and it returns a tibble with the original and adjusted success rates (as a percentage); a field to indicate which adjustment method was used; and information about the confidence interval. You can optionally include one or more grouping variables to compute success rates by groups, and modify the alpha level to adjust confidence intervals.
+#' `success_stats()` and `completion_stats()` are synonyms.
 #'
 #' @param .x You can pass an integer (>0) indicating the total number of successes, and provide the total number of trials  to \code{.y} (where the value of \code{.y} >= \code{.x}). Or you can pass a data frame containing trial data. See the examples below.
 #' @param .y If \code{.x} is an integer representing the total number of successes, \code{.y} should be an integer indicating the total number of trials. Or, if \code{.x} is a long-format data frame, provide the unquoted name of the column containing the success data (as 1s and 0s) to \code{.y}.
@@ -20,20 +20,20 @@
 #' @include laplace-function.R
 #' @include mle-function.R
 #' @include wald_ci-function.R
-#' @rdname success_rate
+#' @rdname success_stats
 #' @examples
 #' # If you want a summary for a single task,
 #' # you can provide the number of successes
 #' # and trials to .x and .y, respectively:
 #'
-#' success_rate(15,20)
+#' success_stats(15,20)
 #'
 #' # The alpha level defaults to .alpha=0.05.
 #' # You can provide your own alpha level
 #' # to .alpha by naming the argument
 #' # when you call the function:
 #'
-#' success_rate(15,20, .alpha = 0.01)
+#' success_stats(15,20, .alpha = 0.01)
 #'
 #' # If you have a long-format data frame,
 #' # where each row contains an individual's
@@ -50,31 +50,31 @@
 #' "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
 #' stringsAsFactors = FALSE)
 #'
-#' success_rate(mydata, task1)
+#' success_stats(mydata, task1)
 #'
 #' # If you have one or more grouping variables,
 #' # you pass them to the ... argument:
-#' success_rate(mydata, task1, group, version, .alpha=0.1)
+#' success_stats(mydata, task1, group, version, .alpha=0.1)
 #'
 
 #' @export
 #'
 #'
-success_rate <- function(.x, .y, ...) {
-  UseMethod("success_rate", .x)
+success_stats <- function(.x, .y, ...) {
+  UseMethod("success_stats", .x)
 }
-#' @rdname success_rate
+#' @rdname success_stats
 #' @export
-completion_rate <- success_rate
+completion_stats <- success_stats
 #'
 #'
-#' @rdname success_rate
+#' @rdname success_stats
 #' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, or a 95\% confidence level.
 #' @export
 #'
-success_rate.numeric <- function(.x, .y, ..., .alpha = NULL) {
+success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
   if (is.data.frame(.x)) {
-    NextMethod("success_rate")
+    NextMethod("success_stats")
   }
   else if (is.numeric(.x) && missing(.y)) {
     stop(
@@ -169,10 +169,10 @@ success_rate.numeric <- function(.x, .y, ..., .alpha = NULL) {
 }
 
 
-#' @rdname success_rate
+#' @rdname success_stats
 #' @export
 #'
-success_rate.data.frame <- function(.x, .y, ..., .alpha = NULL) {
+success_stats.data.frame <- function(.x, .y, ..., .alpha = NULL) {
   if (missing(.alpha)) {
     .alpha <- 0.05
   }
@@ -195,7 +195,7 @@ success_rate.data.frame <- function(.x, .y, ..., .alpha = NULL) {
     )
   .out <-
     dplyr::group_modify(.out,
-                        ~ success_rate.numeric(.x$success,
+                        ~ success_stats.numeric(.x$success,
                                                   .y = .x$trials,
                                                   .alpha = .alpha),
                         .keep = TRUE)

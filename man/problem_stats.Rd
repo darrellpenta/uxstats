@@ -53,10 +53,10 @@ data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
 "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
 stringsAsFactors = FALSE)
 
-problems_stats(mydata, login_prob, group, .alpha=0.1)
+problem_stats(mydata, login_prob, group, .alpha=0.1)
 }
 \seealso{
 Other success rate estimators: 
-\code{\link{success_rate}()}
+\code{\link{success_stats}()}
 }
 \concept{success rate estimators}

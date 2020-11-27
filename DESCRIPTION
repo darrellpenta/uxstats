@@ -18,5 +18,5 @@ Collate:
     'wilson-function.R'
     'problem_stats-function.R'
     'ratings_stats-function.R'
-    'success_rate-function.R'
+    'success_stats-function.R'
     'time_stats-function.R'
