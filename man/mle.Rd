@@ -19,8 +19,8 @@ Computes success rate using Maximum Liklihood estimate
 }
 \seealso{
 Other point estimate helpers: 
+\code{\link{adjwald_ci}()},
 \code{\link{laplace}()},
-\code{\link{wald_ci}()},
 \code{\link{wilson}()}
 }
 \concept{point estimate helpers}

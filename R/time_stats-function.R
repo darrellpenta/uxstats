@@ -22,7 +22,7 @@
 #' @examples
 #' time_stats(c(40, 36, 53, 56, 110, 48, 34, 44, 30, 40, 80))
 #'
-#' mydat <-
+#' .uxdata <-
 #' data.frame(
 #'  "id" = rep(seq(1,10,1),2),
 #'  "group" = rep(c("A","B"),10),
@@ -30,7 +30,7 @@
 #'  "time"  = runif(20,0,1000)
 #' )
 #'
-#' time_stats(mydat, .var=time, group, task, .alpha = 0.001)
+#' time_stats(.uxdata, .var=time, group, task, .alpha = 0.001)
 #' @rdname time_stats
 #' @export
 #'
@@ -41,7 +41,6 @@ time_stats <- function(.data, ...) {
 
 
 #' @rdname time_stats
-#'
 #' @export
 #'
 time_stats.numeric<-function(.data,...,.alpha = NULL){

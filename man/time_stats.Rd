@@ -31,7 +31,7 @@ A tibble with one or more means, confidence interval information, and other info
 \examples{
 time_stats(c(40, 36, 53, 56, 110, 48, 34, 44, 30, 40, 80))
 
-mydat <-
+.uxdata <-
 data.frame(
  "id" = rep(seq(1,10,1),2),
  "group" = rep(c("A","B"),10),
@@ -39,10 +39,11 @@ data.frame(
  "time"  = runif(20,0,1000)
 )
 
-time_stats(mydat, .var=time, group, task, .alpha = 0.001)
+time_stats(.uxdata, .var=time, group, task, .alpha = 0.001)
 }
 \seealso{
 Other means with confidence intervals: 
-\code{\link{ratings_stats}()}
+\code{\link{ratings_stats}()},
+\code{\link{success_vs_bench}()}
 }
 \concept{means with confidence intervals}

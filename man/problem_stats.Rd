@@ -46,14 +46,14 @@ problem_stats(15,20, .alpha = 0.01)
 # you can pass the data frame to .x and
 # specify the name of the task column:
 
-mydata <-
+.uxdata <-
 data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
 "login_prob" = c(1,0,0,1,0,0,1,1,0,0,1,0),
 "group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
 "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
 stringsAsFactors = FALSE)
 
-problem_stats(mydata, login_prob, group, .alpha=0.1)
+problem_stats(.uxdata, login_prob, group, .alpha=0.1)
 }
 \seealso{
 Other success rate estimators: 

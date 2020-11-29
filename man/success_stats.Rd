@@ -53,18 +53,18 @@ success_stats(15,20, .alpha = 0.01)
 # data frame to .x and specify the name
 # of the task column:
 
-mydata <-
+.uxdata <-
 data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
 "task1" = c(1,0,0,1,0,0,1,1,0,0,1,0),
 "group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
 "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
 stringsAsFactors = FALSE)
 
-success_stats(mydata, task1)
+success_stats(.uxdata, task1)
 
 # If you have one or more grouping variables,
 # you pass them to the ... argument:
-success_stats(mydata, task1, group, version, .alpha=0.1)
+success_stats(.uxdata, task1, group, version, .alpha=0.1)
 
 }
 \seealso{

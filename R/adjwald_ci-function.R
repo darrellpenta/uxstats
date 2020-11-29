@@ -6,11 +6,11 @@
 #' @param .Z The Z score corresponding to the desired level of confidence
 #' @return a list with the lower and upper confidence limits (%) as numerics
 #' @family point estimate helpers
-#' @rdname wald_ci
+#' @rdname adjwald_ci
 #' @export
 #'
 #'
-wald_ci <-
+adjwald_ci <-
   function(.success, .trials, .Z = 1.959964){
     .W <- .Z ^ 2
     .success <- (.W / 2) + .success

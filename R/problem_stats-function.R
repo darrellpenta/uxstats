@@ -18,7 +18,7 @@
 #' @include wilson-function.R
 #' @include laplace-function.R
 #' @include mle-function.R
-#' @include wald_ci-function.R
+#' @include adjwald_ci-function.R
 #' @rdname problem_stats
 #' @examples
 #'
@@ -40,14 +40,14 @@
 #' # specify the name of the task column:
 
 #'
-#' mydata <-
+#' .uxdata <-
 #' data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
 #' "login_prob" = c(1,0,0,1,0,0,1,1,0,0,1,0),
 #' "group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
 #' "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
 #' stringsAsFactors = FALSE)
 #'
-#' problem_stats(mydata, login_prob, group, .alpha=0.1)
+#' problem_stats(.uxdata, login_prob, group, .alpha=0.1)
 
 
 #' @export
@@ -73,13 +73,13 @@ problem_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
   else{
     .p <- .x / .y
     if (missing(.alpha)) {
-      .Z <- stats::qnorm(1 - 0.05 / 2)
+      .Z <- stats::qnorm(1.0 - 0.05 / 2)
     }
     else if (.alpha < 0 | .alpha > 1) {
       stop(".alpha must be a positive integer between 0 and 1")
     }
     else {
-      .Z <- .Z <- stats::qnorm(1 - .alpha / 2)
+      .Z <- .Z <- stats::qnorm(1.0 - .alpha / 2)
     }
 
     if (.p > 1) {
@@ -94,7 +94,7 @@ problem_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
       .pout <-
         mle(.success = .x, .trials = .y)
       .ci <-
-        wald_ci(.success = .x,
+        adjwald_ci(.success = .x,
                 .trials = .y,
                 .Z = .Z)
       .out <- list(".5<p<.9", "MLE", .pout, .ci)

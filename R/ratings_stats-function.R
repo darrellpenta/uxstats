@@ -24,14 +24,15 @@
 #'
 #' ratings_stats(c(1,8,8), .limits = c(1,8))
 #'
-#' mydata <-
-#' data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
+#' .uxdata <-
+#' data.frame(
+#' "user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
 #' "ratings" = c(3,4,4.5,1,5,6,5.5,2,7,2,5,4),
 #' "group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
 #' "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
 #' stringsAsFactors = FALSE)
 #'
-#' ratings_stats(mydata, ratings,group,.alpha=0.01,.limits=c(1,7))
+#' ratings_stats(.uxdata, ratings,group,.alpha=0.01,.limits=c(1,7))
 #'
 #' @rdname ratings_stats
 #' @export

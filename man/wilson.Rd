@@ -21,8 +21,8 @@ Computes success rate using Wilson estimate
 }
 \seealso{
 Other point estimate helpers: 
+\code{\link{adjwald_ci}()},
 \code{\link{laplace}()},
-\code{\link{mle}()},
-\code{\link{wald_ci}()}
+\code{\link{mle}()}
 }
 \concept{point estimate helpers}

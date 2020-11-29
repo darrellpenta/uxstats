@@ -19,7 +19,7 @@
 #' @include wilson-function.R
 #' @include laplace-function.R
 #' @include mle-function.R
-#' @include wald_ci-function.R
+#' @include adjwald_ci-function.R
 #' @rdname success_stats
 #' @examples
 #' # If you want a summary for a single task,
@@ -43,18 +43,18 @@
 #' # data frame to .x and specify the name
 #' # of the task column:
 #'
-#' mydata <-
+#' .uxdata <-
 #' data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
 #' "task1" = c(1,0,0,1,0,0,1,1,0,0,1,0),
 #' "group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
 #' "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
 #' stringsAsFactors = FALSE)
 #'
-#' success_stats(mydata, task1)
+#' success_stats(.uxdata, task1)
 #'
 #' # If you have one or more grouping variables,
 #' # you pass them to the ... argument:
-#' success_stats(mydata, task1, group, version, .alpha=0.1)
+#' success_stats(.uxdata, task1, group, version, .alpha=0.1)
 #'
 
 #' @export
@@ -84,13 +84,13 @@ success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
   else{
     .p <- .x / .y
     if (missing(.alpha)) {
-      .Z <- stats::qnorm(1 - 0.05 / 2)
+      .Z <- stats::qnorm(1 - (0.05 / 2))
     }
     else if (.alpha < 0 | .alpha > 1) {
       stop(".alpha must be a positive integer between 0 and 1")
     }
     else {
-      .Z <- .Z <- stats::qnorm(1 - .alpha / 2)
+      .Z <- stats::qnorm(1 - (.alpha / 2))
     }
 
     if (.p > 1) {
@@ -104,7 +104,7 @@ success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
     else if (.p == 0) {
       .pout <- laplace(.success = .x, .trials = .y)
       .ci <-
-        wald_ci(.success = .x,
+        adjwald_ci(.success = .x,
                 .trials = .y,
                 .Z = .Z)
       .out <- list("=0", "Laplace", .pout, list(0, .ci[[2]]))
@@ -114,7 +114,7 @@ success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
     else if (.p == 1) {
       .pout <- laplace(.success = .x, .trials = .y)
       .ci <-
-        wald_ci(.success = .x,
+        adjwald_ci(.success = .x,
                 .trials = .y,
                 .Z = .Z)
       .out <- list("=1", "Laplace", .pout, list(.ci[[1]], 100))
@@ -126,7 +126,7 @@ success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
                .trials = .y,
                .Z = .Z)
       .ci <-
-        wald_ci(.success = .x,
+        adjwald_ci(.success = .x,
                 .trials = .y,
                 .Z = .Z)
       .out <- list("<.5", "Wilson", .pout, .ci)
@@ -137,7 +137,7 @@ success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
       .pout <-
         laplace(.success = .x, .trials = .y)
       .ci <-
-        wald_ci(.success = .x,
+        adjwald_ci(.success = .x,
                 .trials = .y,
                 .Z = .Z)
       .out <- list("<.9", "Laplace", .pout, .ci)
@@ -147,7 +147,7 @@ success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
       .pout <-
         mle(.success = .x, .trials = .y)
       .ci <-
-        wald_ci(.success = .x,
+        adjwald_ci(.success = .x,
                 .trials = .y,
                 .Z = .Z)
       .out <- list(".5<p<.9", "MLE", .pout, .ci)
