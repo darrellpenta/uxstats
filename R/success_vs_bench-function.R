@@ -16,6 +16,7 @@
 #' @importFrom dplyr summarise
 #' @importFrom rlang .data
 #' @include adjwald_ci-function.R
+#' @include laplace-function.R
 
 #' @rdname success_vs_bench
 #' @export
@@ -27,70 +28,78 @@ success_vs_bench <- function(.x, ...) {
 #' @rdname success_vs_bench
 #' @export
 
-success_vs_bench.numeric<-function(.x,.n,.p, ...,.alt=c("greater","less","twotailed"),.alpha=0.05){
-
+success_vs_bench.numeric<-function(.x,.n,.p,...,.alt=c("greater","less","twotailed"),.alpha=0.05){
  if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
  }
   .alt<-match.arg(.alt)
   if(.alt == "greater"){
-     .Z <- stats::qnorm((1.0 -.alpha))
+    .Z <- stats::qnorm((1.0 -.alpha))
   }
   else if(.alt == "less"){
-     .Z <- stats::qnorm(.alpha)
+    .Z <- stats::qnorm(.alpha)
   }
   else if(.alt == "twotailed"){
-  .Z <- stats::qnorm(1.0 - (.alpha/2))
+    .Z <- stats::qnorm(1.0 - (.alpha/2))
   }
   else {
     stop("Something went wrong. Did you provide the correct argument to .alt?")
   }
 
-# if(.x <= 15 & (.n-.x) <= 15){
-    .success <- c(.x, .x+seq(1,(.n-.x),1))
-    .users <- c(rep(.n,times=length(c(.x, .x+seq(1,(.n-.x),1)))))
-     .new<-
-      data.frame(
-        "success" = .success,
-        "users"   = .users
-      )
+if(.x <= 15 & (.n-.x) <= 15){
 
-   .new<-
+  .out <-
+    success_vs_bench_smallsample(.x=.x,.n=.n,.p=.p)
+ .out$best_estimate <- laplace(.x,.n) * 100
+ .out$adjwald_ci_low <- adjwald_ci(.x,.n,.Z=.Z)[[1]]*100
+ .out$adjwald_ci_hi <- adjwald_ci(.x,.n,.Z=.Z)[[2]]*100
+  .out
+}
+else{ return("wah wah") }
+}
+
+#'
+success_vs_bench_smallsample<-function(.x,.n,.p){
+
+  .success <- c(.x, .x+seq(1,(.n-.x),1))
+  .users <- c(rep(.n,times=length(c(.x, .x+seq(1,(.n-.x),1)))))
+  .new<-
+    data.frame(
+      "success" = .success,
+      "users"   = .users
+    )
+
+  .new<-
     dplyr::bind_rows(
       apply(.new,1,
-          function(.xx,.p_=.p,.alt_=.alt, .alpha_=.alpha){
-            .num<-factorial(.xx[2])
-            .denom<-factorial(.xx[1]) * factorial(.xx[2]-.xx[1])
-            .pval_exact<-(.num/.denom)*(.p_^.xx[1])*((1.0-.p_)^(.xx[2]-.xx[1]))
+            function(.xx,.p_=.p){
+              .num<-factorial(.xx[2])
+              .denom<-factorial(.xx[1]) * factorial(.xx[2]-.xx[1])
+              .pval_exact<-(.num/.denom)*(.p_^.xx[1])*((1.0-.p_)^(.xx[2]-.xx[1]))
 
-            return(
-              tibble::tibble(
-                "pval_exact" = .pval_exact)
+              return(
+                tibble::tibble(
+                  "pval_exact" = .pval_exact)
               )
             })
-      )
+    )
 
-.new$adjusted_pval <- .new$pval_exact
-.new$adjusted_pval[1] <- (.5 * .new$pval_exact[1])
-.new<-
-  dplyr::summarise(.new,
-                   `pval_exact` = sum(.data$pval_exact),
-                   `pval_mid`=sum(.data$adjusted_pval),
-                   .groups="keep")
+  .new$adjusted_pval <- .new$pval_exact
+  .new$adjusted_pval[1] <- (.5 * .new$pval_exact[1])
+  .new<-
+    dplyr::summarise(.new,
+                     `pval_exact` = sum(.data$pval_exact),
+                     `pval_mid`=sum(.data$adjusted_pval),
+                     .groups="keep")
 
-.new$successes <-.x
-.new$users <- .n
-.new$observed_success <- (.x/.n)*100
-.new$success_exact_prob <- (100-(.new$pval_exact*100))
-.new$success_mid_prob <- (100-(.new$pval_mid*100))
-.new$adjwald_ci_low <- adjwald_ci(.x,.n,.Z=.Z)[[1]]*100
-.new$adjwald_ci_hi <- adjwald_ci(.x,.n,.Z=.Z)[[2]]*100
-
-return(.new[,c(3,4,5,1,2,6,7,8,9)])
-  # } else{
-  # return("wah wah") }
-
+  .new$successes <-.x
+  .new$users <- .n
+  .new$observed_success_pct <- (.x/.n)*100
+  .new$success_exact_prob <- (100-(.new$pval_exact*100))
+  .new$success_mid_prob <- (100-(.new$pval_mid*100))
+  return(.new[,c(3,4,5,1,2,6,7)])
 }
+
 
 #' @examples
 #'
@@ -106,24 +115,6 @@ return(.new[,c(3,4,5,1,2,6,7,8,9)])
 #' @rdname success_vs_bench
 #' @export
 success_vs_bench.data.frame<-function(.x,.n,.p, ...,.alt=c("greater","less","twotailed"),.alpha=0.05){
-
-  # if (.alpha < 0 | .alpha > 1) {
-  #   stop(".alpha must be a positive integer between 0 and 1")
-  # }
-  # .alt<-match.arg(.alt)
-  # if(.alt == "greater"){
-  #   .Z <- stats::qnorm((1.0 -.alpha))
-  # }
-  # else if(.alt == "less"){
-  #   .Z <- stats::qnorm(.alpha)
-  # }
-  # else if(.alt == "twotailed"){
-  #   .Z <- stats::qnorm(1.0 - (.alpha/2))
-  # }
-  # else {
-  #   stop("Something went wrong. Did you provide the correct argument to .alt?")
-  # }
-  #
 
   .out <-
     dplyr::group_by(.x, ...)

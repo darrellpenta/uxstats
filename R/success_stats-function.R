@@ -84,13 +84,13 @@ success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
   else{
     .p <- .x / .y
     if (missing(.alpha)) {
-      .Z <- stats::qnorm(1 - (0.05 / 2))
+      .Z <- stats::qnorm(1.0 - (0.05 / 2))
     }
     else if (.alpha < 0 | .alpha > 1) {
       stop(".alpha must be a positive integer between 0 and 1")
     }
     else {
-      .Z <- stats::qnorm(1 - (.alpha / 2))
+      .Z <- stats::qnorm(1.0 - (.alpha / 2))
     }
 
     if (.p > 1) {
