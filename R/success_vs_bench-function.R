@@ -9,6 +9,7 @@
 #' @return A tibble with test results
 #' @family means with confidence intervals
 #' @importFrom stats qnorm
+#' @importFrom stats pnorm
 #' @importFrom dplyr n
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr group_by
@@ -53,9 +54,27 @@ if(.x <= 15 & (.n-.x) <= 15){
  .out$best_estimate <- laplace(.x,.n) * 100
  .out$adjwald_ci_low <- adjwald_ci(.x,.n,.Z=.Z)[[1]]*100
  .out$adjwald_ci_hi <- adjwald_ci(.x,.n,.Z=.Z)[[2]]*100
+ .out$method_note <- c("small sample adjust")
   .out
 }
-else{ return("wah wah") }
+else{
+
+.out<-
+  data.frame(
+    "successes"  = .x,
+    "users" = .n,
+    "observed_success_pct" = (.x/.n)*100,
+    "pval_exact" = (1 - stats::pnorm(  ((.x/.n) - .p)/sqrt((.p * (1-.p))/.n),lower.tail = TRUE)),
+    "pval_mid" = 0,
+    "success_exact_prob" = 100 * stats::pnorm(  ((.x/.n) - .p)/sqrt((.p * (1-.p))/.n),lower.tail = TRUE),
+    "success_mid_prob" = 0,
+    "best_estimate" = laplace(.x,.n) * 100,
+    "adjwald_ci_low" = adjwald_ci(.x,.n,.Z=.Z)[[1]]*100,
+    "adjwald_ci_hi" = adjwald_ci(.x,.n,.Z=.Z)[[2]]*100,
+    "method_note" = c("large sample"))
+  .out
+
+  }
 }
 
 #'
