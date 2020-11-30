@@ -49,6 +49,7 @@ ratings_stats(.uxdata, ratings,group,.alpha=0.01,.limits=c(1,7))
 }
 \seealso{
 Other means with confidence intervals: 
+\code{\link{ratings_vs_bench}()},
 \code{\link{success_vs_bench}()},
 \code{\link{time_stats}()}
 }

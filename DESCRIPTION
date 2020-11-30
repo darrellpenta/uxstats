@@ -18,6 +18,7 @@ Collate:
     'wilson-function.R'
     'problem_stats-function.R'
     'ratings_stats-function.R'
+    'ratings_vs_bench.R'
     'success_stats-function.R'
     'success_vs_bench-function.R'
     'time_stats-function.R'

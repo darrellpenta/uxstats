@@ -44,6 +44,7 @@ time_stats(.uxdata, .var=time, group, task, .alpha = 0.001)
 \seealso{
 Other means with confidence intervals: 
 \code{\link{ratings_stats}()},
+\code{\link{ratings_vs_bench}()},
 \code{\link{success_vs_bench}()}
 }
 \concept{means with confidence intervals}

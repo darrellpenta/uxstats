@@ -2,12 +2,17 @@
 % Please edit documentation in R/laplace-function.R
 \name{laplace}
 \alias{laplace}
+\alias{laplace.numeric}
 \title{Computes success rate using Laplace estimate}
 \usage{
-laplace(.success, .trials)
+laplace(.success, ...)
+
+\method{laplace}{numeric}(.success, .trials, ...)
 }
 \arguments{
 \item{.success}{the total number of successes}
+
+\item{...}{Arguments passed to or from other methods}
 
 \item{.trials}{the total number of trials}
 }
