@@ -6,32 +6,38 @@
 \alias{time_stats.data.frame}
 \title{Compute stats for time data}
 \usage{
-time_stats(.data, ...)
+time_stats(.x, ...)
 
-\method{time_stats}{numeric}(.data, ..., .alpha = NULL)
+\method{time_stats}{numeric}(.x, ..., .alpha = 0.05)
 
-\method{time_stats}{data.frame}(.data, .var, ..., .alpha = NULL)
+\method{time_stats}{data.frame}(.x, .var, ..., .alpha = 0.05)
 }
 \arguments{
-\item{.data}{A vector or long-format data frame of numeric data corresponding to task or response times.}
+\item{.x}{A vector or long-format data frame with a named column of numeric values corresponding to task or response times.}
 
-\item{...}{(Optional) The unquoted, comma-separated names of columns containing grouping variables.}
+\item{...}{(Optional) If \code{x} is a data frame, the unquoted, comma-separated names of columns containing grouping variables.}
 
 \item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, or a 95\% confidence level.}
 
-\item{.var}{(Optional) The unquoted name of the data frame column containing the values to use in the computation.}
+\item{.var}{If \code{x} is a data frame, the unquoted name of column containing the values to use in the computations.}
 }
 \value{
 A tibble with one or more means, confidence interval information, and other information.
 }
 \description{
-\href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} describe various approaches for computing stats on task time or response time data when you're working with smaller sample sizes. \code{time_stats()} returns several point estimates, including means, geometric means (better when sample size <= 25), and medians (better for larger sample sizes). It also returns confidence interval information based on transformed data (for small samples) or raw data (for larger samples) for the sample size, andincludes a field to indicate whether the estimates are baed on raw or transformed data. You can optionally include one or more grouping variables to compute statistics by groups, and modify the alpha level to adjust confidence intervals.
-`success_rate()` and `completion_rate()` are synonyms.
+Following \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)}, \code{time_stats()} takes the sample size into account when computing stats on time data.
+}
+\details{
+\code{time_stats()} returns several point estimates, including means, geometric means (better when sample size <= 25), and medians (better for larger sample sizes). It also returns confidence interval information based on log-transformed values (for small samples) or raw (untransformed) data (for larger samples).
+* You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+* If you're passing a data frame to \code{.x}, you can optionally include one or more grouping variables to compute stats by groups.
+
+Note that \code{NAs} are automatically dropped in all calculations.
 }
 \examples{
 time_stats(c(40, 36, 53, 56, 110, 48, 34, 44, 30, 40, 80))
 
-.uxdata <-
+.ux_data <-
 data.frame(
  "id" = rep(seq(1,10,1),2),
  "group" = rep(c("A","B"),10),
@@ -39,12 +45,12 @@ data.frame(
  "time"  = runif(20,0,1000)
 )
 
-time_stats(.uxdata, .var=time, group, task, .alpha = 0.001)
+time_stats(.ux_data, .var=time, group, task, .alpha = 0.001)
 }
 \seealso{
-Other means with confidence intervals: 
+Other descriptive stats for UX measures: 
+\code{\link{problem_stats}()},
 \code{\link{ratings_stats}()},
-\code{\link{ratings_vs_bench}()},
-\code{\link{success_vs_bench}()}
+\code{\link{success_stats}()}
 }
-\concept{means with confidence intervals}
+\concept{descriptive stats for UX measures}

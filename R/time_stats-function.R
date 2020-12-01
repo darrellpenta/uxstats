@@ -1,28 +1,32 @@
 #' Compute stats for time data
 #'
-#' \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} describe various approaches for computing stats on task time or response time data when you're working with smaller sample sizes. \code{time_stats()} returns several point estimates, including means, geometric means (better when sample size <= 25), and medians (better for larger sample sizes). It also returns confidence interval information based on transformed data (for small samples) or raw data (for larger samples) for the sample size, andincludes a field to indicate whether the estimates are baed on raw or transformed data. You can optionally include one or more grouping variables to compute statistics by groups, and modify the alpha level to adjust confidence intervals.
-#' `success_rate()` and `completion_rate()` are synonyms.
-#
-#' @param .data  A vector or long-format data frame of numeric data corresponding to task or response times.
-#' @param .var (Optional) The unquoted name of the data frame column containing the values to use in the computation.
-#' @param ... (Optional) The unquoted, comma-separated names of columns containing grouping variables.
+#' Following \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)}, \code{time_stats()} takes the sample size into account when computing stats on time data.
+#'
+#' @details
+#' \code{time_stats()} returns several point estimates, including means, geometric means (better when sample size <= 25), and medians (better for larger sample sizes). It also returns confidence interval information based on log-transformed values (for small samples) or raw (untransformed) data (for larger samples).
+#' * You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+#' * If you're passing a data frame to \code{.x}, you can optionally include one or more grouping variables to compute stats by groups.
+#'
+#' Note that \code{NAs} are automatically dropped in all calculations.
+#'
+#' @param .x  A vector or long-format data frame with a named column of numeric values corresponding to task or response times.
+#' @param .var If \code{x} is a data frame, the unquoted name of column containing the values to use in the computations.
+#' @param ... (Optional) If \code{x} is a data frame, the unquoted, comma-separated names of columns containing grouping variables.
 #' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, or a 95\% confidence level.
 #' @return A tibble with one or more means, confidence interval information, and other information.
-#' @family means with confidence intervals
+#' @family descriptive stats for UX measures
 #' @importFrom stats qt
 #' @importFrom stats sd
 #' @importFrom stats median
 #' @importFrom dplyr n
-#' @importFrom dplyr filter
 #' @importFrom dplyr group_by
 #' @importFrom dplyr ungroup
 #' @importFrom dplyr summarise
-#' @importFrom dplyr across
 #' @importFrom dplyr group_modify
 #' @examples
 #' time_stats(c(40, 36, 53, 56, 110, 48, 34, 44, 30, 40, 80))
 #'
-#' .uxdata <-
+#' .ux_data <-
 #' data.frame(
 #'  "id" = rep(seq(1,10,1),2),
 #'  "group" = rep(c("A","B"),10),
@@ -30,38 +34,35 @@
 #'  "time"  = runif(20,0,1000)
 #' )
 #'
-#' time_stats(.uxdata, .var=time, group, task, .alpha = 0.001)
+#' time_stats(.ux_data, .var=time, task, .alpha = 0.001)
 #' @rdname time_stats
 #' @export
 #'
 #'
-time_stats <- function(.data, ...) {
-  UseMethod("time_stats", .data)
+time_stats <- function(.x, ...) {
+  UseMethod("time_stats", .x)
 }
 
 
 #' @rdname time_stats
 #' @export
 #'
-time_stats.numeric<-function(.data,...,.alpha = NULL){
+time_stats.numeric<-function(.x,...,.alpha = 0.05){
 
-  if(missing(.alpha)){
-    .p<-0.975
-  }
-  else if (.alpha < 0 | .alpha > 1) {
+   if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
   }
   else {
     .p <- 1.0-(.alpha/2)
   }
-  if(length(.data) <= 25){
-    .m_raw <- mean(.data, na.rm = TRUE)
-    .m_trans <-mean(log(.data), na.rm = TRUE)
-    .geo_m <- exp(mean(log(.data),na.rm = TRUE))
-    .median <- stats::median(.data, na.rm = TRUE)
-    .sd_raw <- stats::sd(.data, na.rm = TRUE)
-    .sd_trans <- stats::sd(log(.data), na.rm = TRUE)
-    .n <- length(.data)
+  if(length(.x) <= 25){
+    .m_raw <- mean(.x, na.rm = TRUE)
+    .m_trans <-mean(log(.x), na.rm = TRUE)
+    .geo_m <- exp(mean(log(.x),na.rm = TRUE))
+    .median <- stats::median(.x, na.rm = TRUE)
+    .sd_raw <- stats::sd(.x, na.rm = TRUE)
+    .sd_trans <- stats::sd(log(.x), na.rm = TRUE)
+    .n <- length(.x)
     .stderr_raw <- (.sd_raw/sqrt(.n))
     .stderr_trans <- (.sd_trans/sqrt(.n))
     .tcrit <- stats::qt(p=.p, df=(.n-1))
@@ -74,29 +75,30 @@ time_stats.numeric<-function(.data,...,.alpha = NULL){
         "mean" = .m_raw,
         "median" = .median,
         "geom_mean" = .geo_m,
+        "ci_method" = paste0((1-.alpha)*100,"% CI using log-transformed data, based on the T distribution."),
         "ci_low" = exp(.m_trans -.me_trans),
         "ci_hi" = exp(.m_trans +.me_trans),
          "stdev" = .sd_raw,
         "n" = .n,
         "t_z_crit" = .tcrit,
-        "raw_transform" = .raw_trans
+        "method note" = .raw_trans
       )
     .out
   }
   else{
-    .m <- mean(.data, na.rm = TRUE)
-    .stdev <- stats::sd(.data, na.rm = TRUE)
-    .geo_m <- exp(mean(log(.data),na.rm = TRUE))
-    .median <- stats::median(.data, na.rm = TRUE)
-    .n <- length(.data)
+    .m <- mean(.x, na.rm = TRUE)
+    .stdev <- stats::sd(.x, na.rm = TRUE)
+    .geo_m <- exp(mean(log(.x),na.rm = TRUE))
+    .median <- stats::median(.x, na.rm = TRUE)
+    .n <- length(.x)
     .zcrit <- stats::qnorm(p=.p)
     .stderr <-sqrt((.n*0.5) * 0.5)
     .me <- .zcrit * .stderr
     .ceil_low <- ceiling((.n * .5) - .me)
     .ceil_hi <- ceiling((.n * .5) + .me)
-    .data <- sort(.data)
-    .ci_low <- .data[.ceil_low]
-    .ci_hi <- .data[.ceil_hi]
+    .x <- sort(.x)
+    .ci_low <- .x[.ceil_low]
+    .ci_hi <- .x[.ceil_hi]
     .raw_trans <- "raw (large n)"
 
 .out<-
@@ -104,12 +106,13 @@ time_stats.numeric<-function(.data,...,.alpha = NULL){
         "mean" = .m,
         "geom_mean" = .geo_m,
         "median" = .median,
+        "ci_method" = paste0((1-.alpha)*100,"% CI around the median using the binomial distribution method in Suaro and Lewis (2012)."),
         "ci_low" = .ci_low,
         "ci_hi" = .ci_hi,
         "n" = .n,
         "t_z_crit" = .zcrit,
         "stdev" = .stdev,
-        "raw_transform" = .raw_trans
+        "method note" = .raw_trans
       )
   }
     return(.out)
@@ -120,16 +123,13 @@ time_stats.numeric<-function(.data,...,.alpha = NULL){
 #' @rdname time_stats
 #' @export
 #'
-time_stats.data.frame <- function(.data,
+time_stats.data.frame <- function(.x,
                                .var,
                                ...,
-                               .alpha = NULL){
+                               .alpha = 0.05){
 
-  if(missing(.alpha)){
-    .p<-0.975
-    .alpha2 <- 0.05
-  }
-  else if (.alpha < 0 | .alpha > 1) {
+
+if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
   }
   else {
@@ -137,12 +137,12 @@ time_stats.data.frame <- function(.data,
     .alpha2 <- .alpha
   }
 
-  .data<-
-    dplyr::select(.data,`new_index` = {{ .var}}, tidyselect::everything())
-  .data<-
-    dplyr::group_by(.data, ...)
+  .x<-
+    dplyr::select(.x,`new_index` = {{ .var}}, tidyselect::everything())
+  .x<-
+    dplyr::group_by(.x, ...)
   .out <-
-    dplyr::group_modify(.data,
+    dplyr::group_modify(.x,
                         ~ time_stats.numeric(.x$new_index, .alpha=.alpha2),
                      .keep = TRUE)
 

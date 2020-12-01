@@ -5,7 +5,7 @@
 #' @param .trials the total number of trials
 #' @param .Z The Z score corresponding to the desired level of confidence
 #' @return an estimated success rate (%) as a numeric
-#' @family point estimate helpers
+#' @family point estimate adjusters
 #' @rdname wilson
 #' @export
 #'

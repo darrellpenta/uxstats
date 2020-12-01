@@ -1,22 +1,27 @@
 #' Compute stats for ratings or continuously distributed data
 #'
-#' For ratings data and other continuously distributed variables, \code{ratings_stats()} returns means;information about confidence intervals (based on the T distribution), standard deviations; medians; and other details. By defaults, \code{NA}s are removed from the data. You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds. \code{NA} values are removed for computations.
-#' @param .data  A vector or long-format data frame of ratings or other continuous data.
-#' @param .var (Optional) The unquoted name of the data frame column containing the values to use in the computation.
-#' @param ... (Optional) The unquoted, comma-separated names of columns containing grouping variables.
+#' For ratings data and other continuously distributed variables, \code{ratings_stats()} returns means; information about confidence intervals (based on the T distribution); standard deviations; medians; and other details.
+#'
+#' @details
+#' * You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+#' * You can specific scale limits so that the output values have upper- and lower-bounds by including \code{.limits} and providing a numeric vector of length 2: e.g., \code{.limits = c(1.5,6.5)}.
+#' * If you're passing a data frame to \code{.x}, you can optionally include one or more grouping variables to compute stats by groups.
+#'
+#' Note that \code{NAs} are automatically dropped in all calculations.
+#'
+#'
+#' @param .x A vector of values, or a long-format data frame with a named column containing numeric ratings data.
+#' @param .var If \code{.x} is a data frame, the unquoted name of the data frame column containing the values to use in the computations.
+#' @param ... (Optional) If \code{.x} is a data frame, the unquoted, comma-separated names of columns containing grouping variables.
 #' @return A tibble with one or more means, confidence interval information, and other information.
-#' @family means with confidence intervals
+#' @family descriptive stats for UX measures
 #' @importFrom stats qt
 #' @importFrom stats sd
 #' @importFrom stats median
 #' @importFrom dplyr n
-#' @importFrom dplyr filter
 #' @importFrom dplyr group_by
-#' @importFrom dplyr ungroup
 #' @importFrom dplyr summarise
-#' @importFrom dplyr mutate
-#' @importFrom dplyr across
-#' @importFrom dplyr select
+
 #' @examples
 #'
 #' # Compare the difference between the output of:
@@ -24,58 +29,55 @@
 #'
 #' ratings_stats(c(1,8,8), .limits = c(1,8))
 #'
-#' .uxdata <-
-#' data.frame(
-#' "user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
-#' "ratings" = c(3,4,4.5,1,5,6,5.5,2,7,2,5,4),
-#' "group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
-#' "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
-#' stringsAsFactors = FALSE)
+#' .ux_data <-
+#'  data.frame(
+#'   "id" = rep(seq(1,10,1),2),
+#'   "group" = rep(c("A","B"),10),
+#'   "task" = c(rep(1,10),rep(2,10)),
+#'   "easiness"  = sample(1:7,20,replace=TRUE))
 #'
-#' ratings_stats(.uxdata, ratings,group,.alpha=0.01,.limits=c(1,7))
+#' ratings_stats(.ux_data, easiness,group,.alpha=0.01,.limits=c(1,7))
 #'
 #' @rdname ratings_stats
 #' @export
 #'
 #'
-ratings_stats <- function(.data, ...) {
-  UseMethod("ratings_stats", .data)
+ratings_stats <- function(.x, ...) {
+  UseMethod("ratings_stats", .x)
 }
 
 
 #' @rdname ratings_stats
-#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, or a 95\% confidence level.
+#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05.
 #' @param .limits (Optional) If you want to specify the end-points (limits) for the ratings scale, which will ensure that confidence interval values don't exceed the upper and lwoer bounds, you can supply a numeric vector of length two,indicating the limits (e.g., \code{.limits = c(1,7)}).
 
 #'
 #' @export
 #'
-ratings_stats.numeric<-function(.data,...,.alpha = NULL,.limits=NULL){
+ratings_stats.numeric<-function(.x,...,.alpha = 0.05,.limits=NULL){
 
-  if(missing(.alpha)){
-    .p<-0.975
-  }
-  else if (.alpha < 0 | .alpha > 1) {
+if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
   }
   else {
     .p <- 1.0-(.alpha/2)
   }
-  .m<-mean(.data, na.rm = TRUE)
-  .sd<-stats::sd(.data, na.rm = TRUE)
-  .n<-length(.data)
+  .m<-mean(.x, na.rm = TRUE)
+  .sd<-stats::sd(.x, na.rm = TRUE)
+  .n<-length(.x)
   .stderr <- (.sd/sqrt(.n))
   .tcrit <- stats::qt(p=.p, df=(.n-1))
   .me <- .tcrit * .stderr
-  .median <- stats::median(.data, na.rm = TRUE)
+  .median <- stats::median(.x, na.rm = TRUE)
   .out<-
     data.frame(
       "mean" = .m,
-      "ci_low" = .m-.me,
-      "ci_hi" = .m+.me,
+      "ci_method" = paste0((1-.alpha)*100,"% CI for continuous data, based on T distrib."),
+      "ci_low" = .m - .me,
+      "ci_hi" = .m + .me,
       "stdev" = .sd,
       "n" = .n,
-      "tcrit" = .tcrit,
+      "t_crit" = .tcrit,
       "median" = .median
     )
 
@@ -100,23 +102,20 @@ ratings_stats.numeric<-function(.data,...,.alpha = NULL,.limits=NULL){
 #' @rdname ratings_stats
 #' @export
 #'
-ratings_stats.data.frame <- function(.data,
+ratings_stats.data.frame <- function(.x,
                                .var,
                                ...,
-                               .alpha = NULL,
+                               .alpha = 0.05,
                                .limits = NULL){
 
-  if(missing(.alpha)){
-    .p<-0.975
-  }
-  else if (.alpha < 0 | .alpha > 1) {
+ if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
   }
   else {
     .p <- 1.0-(.alpha/2)
   }
   .out<-
-    dplyr::group_by(.data, ...)
+    dplyr::group_by(.x, ...)
   .out<-
     dplyr::summarise(.out, mean = mean({{ .var }}, na.rm=TRUE),
               stdev = stats::sd({{ .var }}, na.rm = TRUE),
@@ -125,6 +124,7 @@ ratings_stats.data.frame <- function(.data,
   .out$stderr<- (.out$stdev/sqrt(.out$n))
   .out$tcrit <- stats::qt(p=.p, df=(.out$n-1))
   .out$me <- .out$tcrit * .out$stderr
+  .out$ci_method <- paste0((1-.alpha)*100,"% CI for continuous data, based on T distrib.")
   .out$ci_low <- .out$mean - .out$me
   .out$ci_hi <- .out$mean + .out$me
   .out<-

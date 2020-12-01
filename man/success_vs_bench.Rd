@@ -58,9 +58,8 @@ data.frame(
 success_vs_bench(.uxdata, complete, .p=0.7,group)
 }
 \seealso{
-Other means with confidence intervals: 
-\code{\link{ratings_stats}()},
+Other benchmark comparison stats: 
 \code{\link{ratings_vs_bench}()},
-\code{\link{time_stats}()}
+\code{\link{time_vs_bench}()}
 }
-\concept{means with confidence intervals}
+\concept{benchmark comparison stats}

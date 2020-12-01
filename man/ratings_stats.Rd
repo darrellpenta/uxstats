@@ -6,28 +6,35 @@
 \alias{ratings_stats.data.frame}
 \title{Compute stats for ratings or continuously distributed data}
 \usage{
-ratings_stats(.data, ...)
+ratings_stats(.x, ...)
 
-\method{ratings_stats}{numeric}(.data, ..., .alpha = NULL, .limits = NULL)
+\method{ratings_stats}{numeric}(.x, ..., .alpha = 0.05, .limits = NULL)
 
-\method{ratings_stats}{data.frame}(.data, .var, ..., .alpha = NULL, .limits = NULL)
+\method{ratings_stats}{data.frame}(.x, .var, ..., .alpha = 0.05, .limits = NULL)
 }
 \arguments{
-\item{.data}{A vector or long-format data frame of ratings or other continuous data.}
+\item{.x}{A vector of values, or a long-format data frame with a named column containing numeric ratings data.}
 
-\item{...}{(Optional) The unquoted, comma-separated names of columns containing grouping variables.}
+\item{...}{(Optional) If \code{.x} is a data frame, the unquoted, comma-separated names of columns containing grouping variables.}
 
-\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, or a 95\% confidence level.}
+\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05.}
 
 \item{.limits}{(Optional) If you want to specify the end-points (limits) for the ratings scale, which will ensure that confidence interval values don't exceed the upper and lwoer bounds, you can supply a numeric vector of length two,indicating the limits (e.g., \code{.limits = c(1,7)}).}
 
-\item{.var}{(Optional) The unquoted name of the data frame column containing the values to use in the computation.}
+\item{.var}{If \code{.x} is a data frame, the unquoted name of the data frame column containing the values to use in the computations.}
 }
 \value{
 A tibble with one or more means, confidence interval information, and other information.
 }
 \description{
-For ratings data and other continuously distributed variables, \code{ratings_stats()} returns means;information about confidence intervals (based on the T distribution), standard deviations; medians; and other details. By defaults, \code{NA}s are removed from the data. You can optionally include one or more grouping variables to compute means by groups; modify the alpha level to adjust confidence intervals; and specific scale limits so that the output values have upper- and lower-bounds. \code{NA} values are removed for computations.
+For ratings data and other continuously distributed variables, \code{ratings_stats()} returns means; information about confidence intervals (based on the T distribution); standard deviations; medians; and other details.
+}
+\details{
+* You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+* You can specific scale limits so that the output values have upper- and lower-bounds by including \code{.limits} and providing a numeric vector of length 2: e.g., \code{.limits = c(1.5,6.5)}.
+* If you're passing a data frame to \code{.x}, you can optionally include one or more grouping variables to compute stats by groups.
+
+Note that \code{NAs} are automatically dropped in all calculations.
 }
 \examples{
 
@@ -36,21 +43,20 @@ ratings_stats(c(1,8,8)) # and:
 
 ratings_stats(c(1,8,8), .limits = c(1,8))
 
-.uxdata <-
-data.frame(
-"user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
-"ratings" = c(3,4,4.5,1,5,6,5.5,2,7,2,5,4),
-"group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
-"version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
-stringsAsFactors = FALSE)
+.ux_data <-
+ data.frame(
+  "id" = rep(seq(1,10,1),2),
+  "group" = rep(c("A","B"),10),
+  "task" = c(rep(1,10),rep(2,10)),
+  "easiness"  = sample(1:7,20,replace=TRUE))
 
-ratings_stats(.uxdata, ratings,group,.alpha=0.01,.limits=c(1,7))
+ratings_stats(.ux_data, easiness,group,.alpha=0.01,.limits=c(1,7))
 
 }
 \seealso{
-Other means with confidence intervals: 
-\code{\link{ratings_vs_bench}()},
-\code{\link{success_vs_bench}()},
+Other descriptive stats for UX measures: 
+\code{\link{problem_stats}()},
+\code{\link{success_stats}()},
 \code{\link{time_stats}()}
 }
-\concept{means with confidence intervals}
+\concept{descriptive stats for UX measures}

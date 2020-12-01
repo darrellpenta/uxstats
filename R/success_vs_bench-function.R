@@ -7,7 +7,7 @@
 #' @param .alt For alternatives, one of \code{c("greater","less","twotailed")}. Defaults to "greater" for a one-sided test.
 #' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, corresponding to a 90\% confidence level for a one-sided test.
 #' @return A tibble with test results
-#' @family means with confidence intervals
+#' @family benchmark comparison stats
 #' @importFrom stats qnorm
 #' @importFrom stats pnorm
 #' @importFrom dplyr n
@@ -47,7 +47,22 @@ success_vs_bench.numeric<-function(.x,.n,.p,...,.alt=c("greater","less","twotail
     stop("Something went wrong. Did you provide the correct argument to .alt?")
   }
 
-if(.x <= 15 & (.n-.x) <= 15){
+if(.x >= 15 && (.n-.x) >= 15){
+  .out<-
+    data.frame(
+      "successes"  = .x,
+      "users" = .n,
+      "observed_success_pct" = (.x/.n)*100,
+      "pval_exact" = (1 - stats::pnorm(  ((.x/.n) - .p)/sqrt((.p * (1-.p))/.n),lower.tail = TRUE)),
+      "pval_mid" = NA_integer_,
+      "success_exact_prob" = 100 * stats::pnorm(  ((.x/.n) - .p)/sqrt((.p * (1-.p))/.n),lower.tail = TRUE),
+      "success_mid_prob" = NA_integer_,
+      "best_estimate" = laplace(.x,.n) * 100,
+      "adjwald_ci_low" = adjwald_ci(.x,.n,.Z=.Z)[[1]]*100,
+      "adjwald_ci_hi" = adjwald_ci(.x,.n,.Z=.Z)[[2]]*100,
+      "method_note" = c("large sample"))
+  .out
+  }else{
 
   .out <-
     success_vs_bench_smallsample(.x=.x,.n=.n,.p=.p)
@@ -57,24 +72,7 @@ if(.x <= 15 & (.n-.x) <= 15){
  .out$method_note <- c("small sample adjust")
   .out
 }
-else{
 
-.out<-
-  data.frame(
-    "successes"  = .x,
-    "users" = .n,
-    "observed_success_pct" = (.x/.n)*100,
-    "pval_exact" = (1 - stats::pnorm(  ((.x/.n) - .p)/sqrt((.p * (1-.p))/.n),lower.tail = TRUE)),
-    "pval_mid" = NA_integer_,
-    "success_exact_prob" = 100 * stats::pnorm(  ((.x/.n) - .p)/sqrt((.p * (1-.p))/.n),lower.tail = TRUE),
-    "success_mid_prob" = NA_integer_,
-    "best_estimate" = laplace(.x,.n) * 100,
-    "adjwald_ci_low" = adjwald_ci(.x,.n,.Z=.Z)[[1]]*100,
-    "adjwald_ci_hi" = adjwald_ci(.x,.n,.Z=.Z)[[2]]*100,
-    "method_note" = c("large sample"))
-  .out
-
-  }
 }
 
 #'

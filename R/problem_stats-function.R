@@ -6,7 +6,7 @@
 #' @param .y If \code{.x} is an integer representing the total number of successes, \code{.y} should be an integer indicating the total number of trials. Or, if \code{.x} is a long-format data frame, provide the unquoted name of the column containing the success data (as 1s and 0s) to \code{.y}.
 #' @param ... (Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables here as unquoted, comma-separated column names.
 #' @return A tibble with problem occurrence rate(s), confidence interval information, and other information. All percentage values in the output fall within the range of 0 and 100.
-#' @family success rate estimators
+#' @family descriptive stats for UX measures
 #' @importFrom stats qnorm
 #' @importFrom dplyr n
 #' @importFrom dplyr select
@@ -73,13 +73,13 @@ problem_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
   else{
     .p <- .x / .y
     if (missing(.alpha)) {
-      .Z <- stats::qnorm(1.0 - 0.05 / 2)
+      .Z <- stats::qnorm(1.0 - (0.05 / 2))
     }
     else if (.alpha < 0 | .alpha > 1) {
       stop(".alpha must be a positive integer between 0 and 1")
     }
     else {
-      .Z <- .Z <- stats::qnorm(1.0 - .alpha / 2)
+      .Z <- .Z <- stats::qnorm(1.0 - (.alpha / 2))
     }
 
     if (.p > 1) {
@@ -101,7 +101,7 @@ problem_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
 
     return(
       data.frame(
-        "problem_observed" = .x,
+        "problems_observed" = .x,
         "all_observed" = .y,
         "occurrence_rate_pct" = round(.p * 100, 2),
         "ci_low_pct" = round(.out[[4]][[1]] *100, 2),

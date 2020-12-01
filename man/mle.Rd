@@ -18,9 +18,8 @@ an estimated success rate (%) as a numeric
 Computes success rate using Maximum Liklihood estimate
 }
 \seealso{
-Other point estimate helpers: 
-\code{\link{adjwald_ci}()},
+Other point estimate adjusters: 
 \code{\link{laplace}()},
 \code{\link{wilson}()}
 }
-\concept{point estimate helpers}
+\concept{point estimate adjusters}

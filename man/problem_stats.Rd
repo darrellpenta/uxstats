@@ -56,7 +56,9 @@ stringsAsFactors = FALSE)
 problem_stats(.uxdata, login_prob, group, .alpha=0.1)
 }
 \seealso{
-Other success rate estimators: 
-\code{\link{success_stats}()}
+Other descriptive stats for UX measures: 
+\code{\link{ratings_stats}()},
+\code{\link{success_stats}()},
+\code{\link{time_stats}()}
 }
-\concept{success rate estimators}
+\concept{descriptive stats for UX measures}

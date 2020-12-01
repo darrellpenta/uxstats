@@ -7,7 +7,7 @@
 #' @param ... (Optional) The unquoted, comma-separated names of columns containing grouping variables.
 #' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, corresponding to a 90\% confidence level for a one-sided test.
 #' @return A tibble with test results
-#' @family means with confidence intervals
+#' @family benchmark comparison stats
 #' @importFrom stats qnorm
 #' @importFrom stats pnorm
 #' @importFrom stats pt
@@ -53,10 +53,10 @@ ratings_vs_bench.numeric<-function(.x,.m,.sd,.n,...,.alpha=0.10){
 .ci_hi <- .x+(.t_crit*(.sd/sqrt(.n)))
 return(
   data.frame(
-    "sample mean" = .x,
-    "sample stdev" = .sd,
-    "test mean" = .m,
-    "sample size" = .n,
+    "sample_mean" = .x,
+    "sample_stdev" = .sd,
+    "test_mean" = .m,
+    "sample_size" = .n,
     "pval" = .prob,
     "critical_t" = .t_crit,
     "ci_low" = .ci_low,
@@ -65,7 +65,7 @@ return(
 }
 
 #' @rdname ratings_vs_bench
-#' @param .var  The benchmark mean.
+#' @param .var  The (unquoted) name of the column containing the ratings data.
 #' @export
 #'
 ratings_vs_bench.data.frame<-function(.x,.m,.var,...,.alpha=0.10){

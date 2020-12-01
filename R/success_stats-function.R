@@ -1,13 +1,23 @@
 #' Compute stats for task success (completion) data
 #'
-#' \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} describe various approaches for estimating success rates and generating confidence intervals when you're working with smaller sample sizes. \code{success_stats()} automatically determines which of several estimator adjustments is best suited to the data, and it returns a tibble with the original and adjusted success rates (as a percentage); a field to indicate which adjustment method was used; and information about the confidence interval. You can optionally include one or more grouping variables to compute success rates by groups, and modify the alpha level to adjust confidence intervals.
+#' @description
+#' \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} describe various approaches for estimating success rates and generating confidence intervals when you're working with smaller sample sizes. \code{success_stats()} automatically determines which of several estimator adjustments is best suited to the data, and it returns a tibble with the original and adjusted success rates (as a percentage); a field to indicate which adjustment method was used; and information about the confidence interval.
+#'
 #' `success_stats()` and `completion_stats()` are synonyms.
 #'
-#' @param .x You can pass an integer (>0) indicating the total number of successes, and provide the total number of trials  to \code{.y} (where the value of \code{.y} >= \code{.x}). Or you can pass a data frame containing trial data. See the examples below.
-#' @param .y If \code{.x} is an integer representing the total number of successes, \code{.y} should be an integer indicating the total number of trials. Or, if \code{.x} is a long-format data frame, provide the unquoted name of the column containing the success data (as 1s and 0s) to \code{.y}.
-#' @param ... (Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables here as unquoted, comma-separated column names.
+#' @details
+#'  * \code{.x} is the only required argument if you are passing a vector of 1s and 0s, representing successes and failures, respectively.  e.g., \code{.x <- c(1,1,1,1,1,0,1)}
+#'  * If \code{.x} is a single numeric value representing the total number of successes, \code{.y} should be a single numeric value representing the total number of trials (where the value of \code{.y} >= the value of \code{.x}). e.g., \code{.x = 23, .y = 25}
+#'  * If \code{.x} is a data frame, \code{.y} should be the unquoted name of the column containing the success data (as 1s and 0s).
+#'  * You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+#'  * If you're passing a data frame to \code{.x}, you can optionally include one or more grouping variables to compute stats by groups.
+#'
+#' Note that \code{NAs} are automatically dropped in all calculations.
+#'
+#'
+#' @param .x A single numeric value, a vector of values, or a long-format data frame with a named column of numeric data (1s and/or 0s) corresponding to task success outcomes.
 #' @return A tibble with success rate(s), confidence interval information, and other information. All percentage values in the output fall within the range of 0 and 100.
-#' @family success rate estimators
+#' @family descriptive stats for UX measures
 #' @importFrom stats qnorm
 #' @importFrom dplyr n
 #' @importFrom dplyr select
@@ -22,45 +32,41 @@
 #' @include adjwald_ci-function.R
 #' @rdname success_stats
 #' @examples
-#' # If you want a summary for a single task,
-#' # you can provide the number of successes
-#' # and trials to .x and .y, respectively:
+#' #You can pass a vector of 1s and 0s to .x:
 #'
-#' success_stats(15,20)
+#' success_stats(c(1,1,1,1,0,0,1,1,0,1,0,1))
 #'
-#' # The alpha level defaults to .alpha=0.05.
-#' # You can provide your own alpha level
-#' # to .alpha by naming the argument
-#' # when you call the function:
+#' # If you want a summary for a single task, you can provide the number
+#' # of successes and trials to .x and .y, respectively:
+#'
+#' success_stats(.x = 15, .y = 20)
+#'
+#'
+#' # You can pass a long-format data frame to .x and
+#' # and specify the name of the appropriate column to .y:
+#'
+#' .ux_data <-
+#'   data.frame(
+#'    "id" = rep(seq(1,10,1),2),
+#'    "group" = rep(c("A","B"),10),
+#'    "task" = c(rep(1,10),rep(2,10)),
+#'    "task_success"  = sample(0:1,20,replace=TRUE,prob = c(.3,.65)))
+#'
+#' success_stats(.ux_data, task_success)
+#'
+#' # If you have one or more grouping variables, pass them to the ... argument:
+#'
+#' success_stats(.ux_data, task_success, group, task)
+#'
+#' # The alpha level defaults to .alpha=0.05. Change the value by
+#' # naming the argument when you call the function:
 #'
 #' success_stats(15,20, .alpha = 0.01)
-#'
-#' # If you have a long-format data frame,
-#' # where each row contains an individual's
-#' # data, and at least one column includes
-#' # success (as 1s) or failure (as 0s) values
-#' # for a given task, you can pass the
-#' # data frame to .x and specify the name
-#' # of the task column:
-#'
-#' .uxdata <-
-#' data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
-#' "task1" = c(1,0,0,1,0,0,1,1,0,0,1,0),
-#' "group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
-#' "version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
-#' stringsAsFactors = FALSE)
-#'
-#' success_stats(.uxdata, task1)
-#'
-#' # If you have one or more grouping variables,
-#' # you pass them to the ... argument:
-#' success_stats(.uxdata, task1, group, version, .alpha=0.1)
-#'
 
 #' @export
 #'
 #'
-success_stats <- function(.x, .y, ...) {
+success_stats <- function(.x, ...) {
   UseMethod("success_stats", .x)
 }
 #' @rdname success_stats
@@ -69,29 +75,35 @@ completion_stats <- success_stats
 #'
 #'
 #' @rdname success_stats
-#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, or a 95\% confidence level.
+#' @param .y A single numeric value or the (unquoted) name of a data frame column. See Details.
+#' @param ... (Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables here as unquoted, comma-separated column names.
+#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05.
 #' @export
 #'
-success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
-  if (is.data.frame(.x)) {
-    NextMethod("success_stats")
-  }
-  else if (is.numeric(.x) && missing(.y)) {
+success_stats.numeric <- function(.x, .y = NULL, ..., .alpha = .05) {
+if(length(.x)==1 && missing(.y)) {
     stop(
-      ".x should be a numeric representing the number of successes. You need to specify .y as the number of trials."
+      "You need to specify .y as the total number of trials."
     )
   }
-  else{
-    .p <- .x / .y
-    if (missing(.alpha)) {
-      .Z <- stats::qnorm(1.0 - (0.05 / 2))
-    }
-    else if (.alpha < 0 | .alpha > 1) {
+    if (.alpha < 0 | .alpha > 1) {
       stop(".alpha must be a positive integer between 0 and 1")
     }
     else {
       .Z <- stats::qnorm(1.0 - (.alpha / 2))
     }
+
+  if(length(.x)== 1){
+  .p <- .x / .y
+  } else if (any(.x >1,na.rm = TRUE)){
+    stop("If you're passing a vector of values, the vector should contain only 1s (for successes) and 0s (for failures).")
+  } else{
+    .y <-
+      length(.x[!is.na(.x)])
+    .x <-
+      sum(.x, na.rm=TRUE)
+    .p <- (.x/.y)
+ }
 
     if (.p > 1) {
       return("STOP! Check your calculations; rate is greater than 100")
@@ -110,7 +122,6 @@ success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
       .out <- list("=0", "Laplace", .pout, list(0, .ci[[2]]))
       .out
     }
-
     else if (.p == 1) {
       .pout <- laplace(.success = .x, .trials = .y)
       .ci <-
@@ -132,7 +143,6 @@ success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
       .out <- list("<.5", "Wilson", .pout, .ci)
       .out
     }
-
     else if (.p > .9 && .p != 0) {
       .pout <-
         laplace(.success = .x, .trials = .y)
@@ -157,17 +167,17 @@ success_stats.numeric <- function(.x, .y, ..., .alpha = NULL) {
       data.frame(
         "successes" = .x,
         "trials" = .y,
-        "orig_succ_pct" = round(.p * 100, 2),
+        "observed_success" = round(.p * 100, 2),
         "estimator" = .out[[2]],
-        "success_pct" = round(.out[[3]] * 100, 2),
-        "ci_low_pct" = round(.out[[4]][[1]] *100, 2),
-        "ci_hi_pct" =  round(.out[[4]][[2]] * 100, 2),
+        "estim_success" = round(.out[[3]] * 100, 2),
+        "ci_method" = paste0((1-.alpha)*100,"% CI based on Adjusted Wald"),
+        "ci_low" = round(.out[[4]][[1]] *100, 2),
+        "ci_hi" =  round(.out[[4]][[2]] * 100, 2),
         stringsAsFactors = FALSE
       )
     )
-  }
-}
 
+}
 
 #' @rdname success_stats
 #' @export

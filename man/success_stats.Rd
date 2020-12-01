@@ -7,68 +7,76 @@
 \alias{success_stats.data.frame}
 \title{Compute stats for task success (completion) data}
 \usage{
-success_stats(.x, .y, ...)
+success_stats(.x, ...)
 
-completion_stats(.x, .y, ...)
+completion_stats(.x, ...)
 
-\method{success_stats}{numeric}(.x, .y, ..., .alpha = NULL)
+\method{success_stats}{numeric}(.x, .y = NULL, ..., .alpha = 0.05)
 
 \method{success_stats}{data.frame}(.x, .y, ..., .alpha = NULL)
 }
 \arguments{
-\item{.x}{You can pass an integer (>0) indicating the total number of successes, and provide the total number of trials  to \code{.y} (where the value of \code{.y} >= \code{.x}). Or you can pass a data frame containing trial data. See the examples below.}
-
-\item{.y}{If \code{.x} is an integer representing the total number of successes, \code{.y} should be an integer indicating the total number of trials. Or, if \code{.x} is a long-format data frame, provide the unquoted name of the column containing the success data (as 1s and 0s) to \code{.y}.}
+\item{.x}{A single numeric value, a vector of values, or a long-format data frame with a named column of numeric data (1s and/or 0s) corresponding to task success outcomes.}
 
 \item{...}{(Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables here as unquoted, comma-separated column names.}
 
-\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, or a 95\% confidence level.}
+\item{.y}{A single numeric value or the (unquoted) name of a data frame column. See Details.}
+
+\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05.}
 }
 \value{
 A tibble with success rate(s), confidence interval information, and other information. All percentage values in the output fall within the range of 0 and 100.
 }
 \description{
-\href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} describe various approaches for estimating success rates and generating confidence intervals when you're working with smaller sample sizes. \code{success_stats()} automatically determines which of several estimator adjustments is best suited to the data, and it returns a tibble with the original and adjusted success rates (as a percentage); a field to indicate which adjustment method was used; and information about the confidence interval. You can optionally include one or more grouping variables to compute success rates by groups, and modify the alpha level to adjust confidence intervals.
+\href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} describe various approaches for estimating success rates and generating confidence intervals when you're working with smaller sample sizes. \code{success_stats()} automatically determines which of several estimator adjustments is best suited to the data, and it returns a tibble with the original and adjusted success rates (as a percentage); a field to indicate which adjustment method was used; and information about the confidence interval.
+
 `success_stats()` and `completion_stats()` are synonyms.
 }
+\details{
+* \code{.x} is the only required argument if you are passing a vector of 1s and 0s, representing successes and failures, respectively.  e.g., \code{.x <- c(1,1,1,1,1,0,1)}
+ * If \code{.x} is a single numeric value representing the total number of successes, \code{.y} should be a single numeric value representing the total number of trials (where the value of \code{.y} >= the value of \code{.x}). e.g., \code{.x = 23, .y = 25}
+ * If \code{.x} is a data frame, \code{.y} should be the unquoted name of the column containing the success data (as 1s and 0s).
+ * You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+ * If you're passing a data frame to \code{.x}, you can optionally include one or more grouping variables to compute stats by groups.
+
+Note that \code{NAs} are automatically dropped in all calculations.
+}
 \examples{
-# If you want a summary for a single task,
-# you can provide the number of successes
-# and trials to .x and .y, respectively:
+#You can pass a vector of 1s and 0s to .x:
 
-success_stats(15,20)
+success_stats(c(1,1,1,1,0,0,1,1,0,1,0,1))
 
-# The alpha level defaults to .alpha=0.05.
-# You can provide your own alpha level
-# to .alpha by naming the argument
-# when you call the function:
+# If you want a summary for a single task, you can provide the number
+# of successes and trials to .x and .y, respectively:
+
+success_stats(.x = 15, .y = 20)
+
+
+# You can pass a long-format data frame to .x and
+# and specify the name of the appropriate column to .y:
+
+.ux_data <-
+  data.frame(
+   "id" = rep(seq(1,10,1),2),
+   "group" = rep(c("A","B"),10),
+   "task" = c(rep(1,10),rep(2,10)),
+   "task_success"  = sample(0:1,20,replace=TRUE,prob = c(.3,.65)))
+
+success_stats(.ux_data, task_success)
+
+# If you have one or more grouping variables, pass them to the ... argument:
+
+success_stats(.ux_data, task_success, group, task)
+
+# The alpha level defaults to .alpha=0.05. Change the value by
+# naming the argument when you call the function:
 
 success_stats(15,20, .alpha = 0.01)
-
-# If you have a long-format data frame,
-# where each row contains an individual's
-# data, and at least one column includes
-# success (as 1s) or failure (as 0s) values
-# for a given task, you can pass the
-# data frame to .x and specify the name
-# of the task column:
-
-.uxdata <-
-data.frame("user_id" = c(1,2,3,4,5,6,7,8,9,10,11,12),
-"task1" = c(1,0,0,1,0,0,1,1,0,0,1,0),
-"group"=c("A","B","A","A","B","A","B","A","B","B","A","B"),
-"version"=c(2,1,1,2,1,2,2,1,2,1,1,2),
-stringsAsFactors = FALSE)
-
-success_stats(.uxdata, task1)
-
-# If you have one or more grouping variables,
-# you pass them to the ... argument:
-success_stats(.uxdata, task1, group, version, .alpha=0.1)
-
 }
 \seealso{
-Other success rate estimators: 
-\code{\link{problem_stats}()}
+Other descriptive stats for UX measures: 
+\code{\link{problem_stats}()},
+\code{\link{ratings_stats}()},
+\code{\link{time_stats}()}
 }
-\concept{success rate estimators}
+\concept{descriptive stats for UX measures}
