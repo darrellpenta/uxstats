@@ -13,8 +13,9 @@
 #' \itemize{
 #'   \item If \code{.x} is a single numeric value representing the total number of successes, \code{.n} should be a single numeric value representing the total number of users, where the value of \code{.n} >= the value of \code{.x}). e.g., \code{.x = 23, .n = 25}
 #'   \item If \code{.x} is a data frame, \code{.var} should be the unquoted name of the column containing the success data (as 1s and 0s).
-#'   \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
 #'   \item If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
+#'   \item You can choose from among the test alternatives \code{c("greater","less","twotailed")} by providing one of the options to the \code{.alt} argument: e.g., \code{.alt = "twotailed"}. Defaults to "greater" for a one-sided test.
+#'   \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
 #' }
 #'
 #' Note that \code{NAs} are automatically dropped in all calculations.
@@ -27,14 +28,10 @@
 #' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.
 #' @return A tibble with data summaries and test results
 #' @family benchmark comparison stats
-#' @importFrom stats qnorm
-#' @importFrom stats pnorm
-#' @importFrom dplyr n
-#' @importFrom dplyr bind_rows
-#' @importFrom dplyr group_by
-#' @importFrom dplyr group_modify
-#' @importFrom dplyr summarise
+#' @importFrom stats qnorm pnorm
+#' @importFrom dplyr n bind_rows group_by group_modify summarise
 #' @importFrom rlang .data
+#' @importFrom tibble tibble
 #' @include adjwald_ci-function.R
 #' @include laplace-function.R
 

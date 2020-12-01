@@ -21,11 +21,7 @@
 #' @return A tibble with success rate(s), confidence interval information, and other information. All percentage values in the output fall within the range of 0 and 100.
 #' @family descriptive stats for UX measures
 #' @importFrom stats qnorm
-#' @importFrom dplyr n
-#' @importFrom dplyr select
-#' @importFrom dplyr group_by
-#' @importFrom dplyr group_modify
-#' @importFrom dplyr summarise
+#' @importFrom dplyr n select group_by group_modify summarise
 #' @include wilson-function.R
 #' @include laplace-function.R
 #' @include mle-function.R

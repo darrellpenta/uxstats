@@ -17,13 +17,8 @@
 #' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.
 #' @return A tibble with one or more means, confidence interval information, and other information.
 #' @family descriptive stats for UX measures
-#' @importFrom stats qt
-#' @importFrom stats sd
-#' @importFrom stats median
-#' @importFrom dplyr n
-#' @importFrom dplyr group_by
-#' @importFrom dplyr summarise
-#' @importFrom dplyr group_modify
+#' @importFrom stats qt sd median
+#' @importFrom dplyr n group_by summarise group_modify
 #' @examples
 #' time_stats(c(40, 36, 53, 56, 110, 48, 34, 44, 30, 40, 80))
 #'
@@ -32,7 +27,7 @@
 #'  "id" = rep(seq(1,10,1),2),
 #'  "group" = rep(c("A","B"),10),
 #'  "task" = c(rep(1,10),rep(2,10)),
-#'  "time"  = runif(20,0,1000)
+#'  "time"  = runif(20,200,1000)
 #' )
 #'
 #' time_stats(.ux_data, .var=time, task, .alpha = 0.001)

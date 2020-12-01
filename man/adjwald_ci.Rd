@@ -19,4 +19,8 @@ a list with the lower and upper confidence limits (%) as numerics
 \description{
 Computes confidence intervals using adjusted Wald (Agresti & Coull, 1998)
 }
+\seealso{
+Other point estimate helpers: 
+\code{\link{tdist_ci}()}
+}
 \concept{point estimate helpers}

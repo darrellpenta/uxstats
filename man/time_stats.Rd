@@ -44,7 +44,7 @@ data.frame(
  "id" = rep(seq(1,10,1),2),
  "group" = rep(c("A","B"),10),
  "task" = c(rep(1,10),rep(2,10)),
- "time"  = runif(20,0,1000)
+ "time"  = runif(20,200,1000)
 )
 
 time_stats(.ux_data, .var=time, task, .alpha = 0.001)

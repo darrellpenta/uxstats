@@ -21,5 +21,6 @@ Collate:
     'ratings_vs_bench-function.R'
     'success_stats-function.R'
     'success_vs_bench-function.R'
+    'tdist_ci-function.R'
     'time_stats-function.R'
     'time_vs_benchmark-function.R'

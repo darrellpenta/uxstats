@@ -17,12 +17,8 @@
 #' @param ... (Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
 #' @return A tibble with one or more means, confidence interval information, and other information.
 #' @family descriptive stats for UX measures
-#' @importFrom stats qt
-#' @importFrom stats sd
-#' @importFrom stats median
-#' @importFrom dplyr n
-#' @importFrom dplyr group_by
-#' @importFrom dplyr summarise
+#' @importFrom stats qt sd median
+#' @importFrom dplyr n group_by summarise
 
 #' @examples
 #'

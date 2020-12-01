@@ -50,8 +50,9 @@ A tibble with data summaries and test results
  \item If \code{.x} is a single numeric value representing the sample mean, provide the sample standard deviation and sample size to \code{.sd} and \code{.n}, respectively.
  \item If \code{.x} is a numeric vector of ratings values, you should only specify the test (benchmark) mean.
  \item If \code{.x} is a data frame, \code{.var} should be the unquoted name of the column containing the ratings values.
- \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
  \item If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
+  \item You can choose from among the test alternatives \code{c("greater","less","twotailed")} by providing one of the options to the \code{.alt} argument: e.g., \code{.alt = "twotailed"}. Defaults to "greater" for a one-sided test.
+ \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
 }
 
 Note that \code{NAs} are automatically dropped in all calculations.
