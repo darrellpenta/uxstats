@@ -3,9 +3,11 @@
 #' For ratings data and other continuously distributed variables, \code{ratings_stats()} returns means; information about confidence intervals (based on the T distribution); standard deviations; medians; and other details.
 #'
 #' @details
-#' * You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
-#' * You can specific scale limits so that the output values have upper- and lower-bounds by including \code{.limits} and providing a numeric vector of length 2: e.g., \code{.limits = c(1.5,6.5)}.
-#' * If you're passing a data frame to \code{.x}, you can optionally include one or more grouping variables to compute stats by groups.
+#' \itemize{
+#'  \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+#'  \item You can specific scale limits so that the output values have upper- and lower-bounds by including \code{.limits} and providing a numeric vector of length 2: e.g., \code{.limits = c(1.5,6.5)}.
+#'  \item If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
+#' }
 #'
 #' Note that \code{NAs} are automatically dropped in all calculations.
 #'
@@ -32,11 +34,10 @@
 #' .ux_data <-
 #'  data.frame(
 #'   "id" = rep(seq(1,10,1),2),
-#'   "group" = rep(c("A","B"),10),
 #'   "task" = c(rep(1,10),rep(2,10)),
 #'   "easiness"  = sample(1:7,20,replace=TRUE))
 #'
-#' ratings_stats(.ux_data, easiness,group,.alpha=0.01,.limits=c(1,7))
+#' ratings_stats(.ux_data, easiness,task,.alpha=0.01,.limits=c(1,7))
 #'
 #' @rdname ratings_stats
 #' @export
@@ -48,8 +49,8 @@ ratings_stats <- function(.x, ...) {
 
 
 #' @rdname ratings_stats
-#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05.
-#' @param .limits (Optional) If you want to specify the end-points (limits) for the ratings scale, which will ensure that confidence interval values don't exceed the upper and lwoer bounds, you can supply a numeric vector of length two,indicating the limits (e.g., \code{.limits = c(1,7)}).
+#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.
+#' @param .limits (Optional) If you want to specify the end-points (limits) for the ratings scale, which will ensure that confidence interval values don't exceed the upper and lower bounds, you can supply a numeric vector of length two,indicating the limits (e.g., \code{.limits = c(1,7)}).
 
 #'
 #' @export
@@ -72,9 +73,9 @@ if (.alpha < 0 | .alpha > 1) {
   .out<-
     data.frame(
       "mean" = .m,
-      "ci_method" = paste0((1-.alpha)*100,"% CI for continuous data, based on T distrib."),
       "ci_low" = .m - .me,
       "ci_hi" = .m + .me,
+      "ci_method" = paste0((1.0-.alpha)*100,"% CI for continuous data, based on T distrib."),
       "stdev" = .sd,
       "n" = .n,
       "t_crit" = .tcrit,
@@ -124,9 +125,9 @@ ratings_stats.data.frame <- function(.x,
   .out$stderr<- (.out$stdev/sqrt(.out$n))
   .out$tcrit <- stats::qt(p=.p, df=(.out$n-1))
   .out$me <- .out$tcrit * .out$stderr
-  .out$ci_method <- paste0((1-.alpha)*100,"% CI for continuous data, based on T distrib.")
   .out$ci_low <- .out$mean - .out$me
   .out$ci_hi <- .out$mean + .out$me
+  .out$ci_method <- paste0((1.0-.alpha)*100,"% CI for continuous data, based on T distrib.")
   .out<-
     dplyr::ungroup(.out)
 

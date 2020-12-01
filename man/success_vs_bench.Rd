@@ -2,15 +2,18 @@
 % Please edit documentation in R/success_vs_bench-function.R
 \name{success_vs_bench}
 \alias{success_vs_bench}
+\alias{completion_vs_bench}
 \alias{success_vs_bench.numeric}
 \alias{success_vs_bench.data.frame}
 \title{Compare a success rate to a benchmark}
 \usage{
 success_vs_bench(.x, ...)
 
+completion_vs_bench(.x, ...)
+
 \method{success_vs_bench}{numeric}(
   .x,
-  .n,
+  .n = NULL,
   .p,
   ...,
   .alt = c("greater", "less", "twotailed"),
@@ -27,35 +30,50 @@ success_vs_bench(.x, ...)
 )
 }
 \arguments{
-\item{.x}{The number of observed successes.}
+\item{.x}{A single numeric value, a vector of values, or a long-format data frame with a named column of numeric data (1s and/or 0s) corresponding to task success outcomes. See Details.}
 
-\item{...}{(Optional) The unquoted, comma-separated names of columns containing grouping variables.}
+\item{...}{If \code{.x} is a data frame, the unquoted, comma-separated names of columns containing grouping variables.}
 
-\item{.n}{The total number of users.}
+\item{.n}{A single numeric value representing the total number of trials, or the (unquoted) name of a data frame column. See Details.}
 
-\item{.p}{The test proportion (must be a numeric between 0-1).}
+\item{.p}{The test (benchmark) proportion (must be a numeric between 0-1).}
 
-\item{.alt}{For alternatives, one of \code{c("greater","less","twotailed")}. Defaults to "greater" for a one-sided test.}
+\item{.alt}{For test alternatives, one of \code{c("greater","less","twotailed")}. Defaults to "greater" for a one-sided test.}
 
-\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, corresponding to a 90\% confidence level for a one-sided test.}
+\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.}
 }
 \value{
-A tibble with test results
+A tibble with data summaries and test results
 }
 \description{
-Compare a success rate to a benchmark
+\code{success_vs_bench()} tests an observed success rate against a given benchmark. Following \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)}, it takes the sample size into account in providing estimates.
+
+\code{success_vs_bench()} and \code{completion_vs_bench()} are synonyms.
+}
+\details{
+\code{success_vs_bench()} returns a variety of estimates. \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} recommend using the mid-probability from the binomial distribution for small sample sizes (i.e., cases with fewer than 15 successes and 15 failures), and for large sample sizes, using the normal approximation to the binomial. The function also reports the best estimate success rate using the Laplace calculation.
+
+\code{success_vs_bench} assumes that you want to test the hypothesis that the observed outcome \emph{exceeds} the benchmark, and therefore, defaults to a one-tailed test. This means that setting \code{.alpha = 0.05} (the default) produces a 90\% confidence interval.
+
+ * If \code{.x} is a single numeric value representing the total number of successes, \code{.n} should be a single numeric value representing the total number of users, where the value of \code{.n} >= the value of \code{.x}). e.g., \code{.x = 23, .n = 25}
+ * If \code{.x} is a data frame, \code{.n} should be the unquoted name of the column containing the success data (as 1s and 0s).
+ * You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+ * If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names to \code{...} to compute stats by groups.
+
+Note that \code{NAs} are automatically dropped in all calculations.
 }
 \examples{
+# Comparing 19 success/25 trials (users) to a 75\% benchmark completion rate
+success_vs_bench(19,25,0.75)
 
-.uxdata <-
+.ux_data <-
 data.frame(
  "id" = rep(seq(1,10,1),2),
- "group" = rep(c("A","B"),10),
  "task" = c(rep(1,10),rep(2,10)),
  "complete"  = sample(0:1,20,replace=TRUE,prob = c(.3,.65))
 )
 
-success_vs_bench(.uxdata, complete, .p=0.7,group)
+success_vs_bench(.ux_data, complete, .p=0.7,task)
 }
 \seealso{
 Other benchmark comparison stats: 

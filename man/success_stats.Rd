@@ -11,18 +11,20 @@ success_stats(.x, ...)
 
 completion_stats(.x, ...)
 
-\method{success_stats}{numeric}(.x, .y = NULL, ..., .alpha = 0.05)
+\method{success_stats}{numeric}(.x, .n = NULL, ..., .alpha = 0.05)
 
-\method{success_stats}{data.frame}(.x, .y, ..., .alpha = NULL)
+\method{success_stats}{data.frame}(.x, .var, ..., .alpha = NULL)
 }
 \arguments{
-\item{.x}{A single numeric value, a vector of values, or a long-format data frame with a named column of numeric data (1s and/or 0s) corresponding to task success outcomes.}
+\item{.x}{A single numeric value, a vector of values, or a long-format data frame with a named column of numeric data (1s and/or 0s) corresponding to task success outcomes. See Details.}
 
 \item{...}{(Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables here as unquoted, comma-separated column names.}
 
-\item{.y}{A single numeric value or the (unquoted) name of a data frame column. See Details.}
+\item{.n}{If \code{.x} is a single numeric value, \code{.n} should be a single numeric value representing the total number of trials. See Details.}
 
-\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05.}
+\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.}
+
+\item{.var}{If \code{.x} is a long-format data frame, the (unquoted) name of a data frame column containing task success outcomes (as 1s and 0s, corresponding to successes and failures, respectively).}
 }
 \value{
 A tibble with success rate(s), confidence interval information, and other information. All percentage values in the output fall within the range of 0 and 100.
@@ -30,14 +32,16 @@ A tibble with success rate(s), confidence interval information, and other inform
 \description{
 \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} describe various approaches for estimating success rates and generating confidence intervals when you're working with smaller sample sizes. \code{success_stats()} automatically determines which of several estimator adjustments is best suited to the data, and it returns a tibble with the original and adjusted success rates (as a percentage); a field to indicate which adjustment method was used; and information about the confidence interval.
 
-`success_stats()` and `completion_stats()` are synonyms.
+\code{success_stats()} and \code{completion_stats()} are synonyms.
 }
 \details{
-* \code{.x} is the only required argument if you are passing a vector of 1s and 0s, representing successes and failures, respectively.  e.g., \code{.x <- c(1,1,1,1,1,0,1)}
- * If \code{.x} is a single numeric value representing the total number of successes, \code{.y} should be a single numeric value representing the total number of trials (where the value of \code{.y} >= the value of \code{.x}). e.g., \code{.x = 23, .y = 25}
- * If \code{.x} is a data frame, \code{.y} should be the unquoted name of the column containing the success data (as 1s and 0s).
- * You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
- * If you're passing a data frame to \code{.x}, you can optionally include one or more grouping variables to compute stats by groups.
+\itemize{
+  \item \code{.x} is the only required argument if you are passing a vector of 1s and 0s, representing successes and failures, respectively.  e.g., \code{.x = c(1,1,1,1,1,0,1)}
+ \item \code{.x} is a single numeric value representing the total number of successes, \code{.n} should be a single numeric value representing the total number of trials (where the value of \code{.y} >= the value of \code{.x}). e.g., \code{.x = 23, .y = 25}
+ \item \code{.x} is a data frame, \code{.var} should be the unquoted name of the column containing the success data (as 1s and 0s).
+ \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+ \item If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
+}
 
 Note that \code{NAs} are automatically dropped in all calculations.
 }
@@ -47,13 +51,13 @@ Note that \code{NAs} are automatically dropped in all calculations.
 success_stats(c(1,1,1,1,0,0,1,1,0,1,0,1))
 
 # If you want a summary for a single task, you can provide the number
-# of successes and trials to .x and .y, respectively:
+# of successes and trials to .x and .n, respectively:
 
-success_stats(.x = 15, .y = 20)
+success_stats(.x = 15, .n = 20)
 
 
 # You can pass a long-format data frame to .x and
-# and specify the name of the appropriate column to .y:
+# and specify the name of the appropriate column to .var:
 
 .ux_data <-
   data.frame(
@@ -68,7 +72,7 @@ success_stats(.ux_data, task_success)
 
 success_stats(.ux_data, task_success, group, task)
 
-# The alpha level defaults to .alpha=0.05. Change the value by
+# .alpha defaults to 0.05. Change the value by
 # naming the argument when you call the function:
 
 success_stats(15,20, .alpha = 0.01)

@@ -17,9 +17,9 @@ ratings_stats(.x, ...)
 
 \item{...}{(Optional) If \code{.x} is a data frame, the unquoted, comma-separated names of columns containing grouping variables.}
 
-\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05.}
+\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.}
 
-\item{.limits}{(Optional) If you want to specify the end-points (limits) for the ratings scale, which will ensure that confidence interval values don't exceed the upper and lwoer bounds, you can supply a numeric vector of length two,indicating the limits (e.g., \code{.limits = c(1,7)}).}
+\item{.limits}{(Optional) If you want to specify the end-points (limits) for the ratings scale, which will ensure that confidence interval values don't exceed the upper and lower bounds, you can supply a numeric vector of length two,indicating the limits (e.g., \code{.limits = c(1,7)}).}
 
 \item{.var}{If \code{.x} is a data frame, the unquoted name of the data frame column containing the values to use in the computations.}
 }
@@ -30,9 +30,11 @@ A tibble with one or more means, confidence interval information, and other info
 For ratings data and other continuously distributed variables, \code{ratings_stats()} returns means; information about confidence intervals (based on the T distribution); standard deviations; medians; and other details.
 }
 \details{
-* You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
-* You can specific scale limits so that the output values have upper- and lower-bounds by including \code{.limits} and providing a numeric vector of length 2: e.g., \code{.limits = c(1.5,6.5)}.
-* If you're passing a data frame to \code{.x}, you can optionally include one or more grouping variables to compute stats by groups.
+\itemize{
+ \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+ \item You can specific scale limits so that the output values have upper- and lower-bounds by including \code{.limits} and providing a numeric vector of length 2: e.g., \code{.limits = c(1.5,6.5)}.
+ \item If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
+}
 
 Note that \code{NAs} are automatically dropped in all calculations.
 }
@@ -46,11 +48,10 @@ ratings_stats(c(1,8,8), .limits = c(1,8))
 .ux_data <-
  data.frame(
   "id" = rep(seq(1,10,1),2),
-  "group" = rep(c("A","B"),10),
   "task" = c(rep(1,10),rep(2,10)),
   "easiness"  = sample(1:7,20,replace=TRUE))
 
-ratings_stats(.ux_data, easiness,group,.alpha=0.01,.limits=c(1,7))
+ratings_stats(.ux_data, easiness,task,.alpha=0.01,.limits=c(1,7))
 
 }
 \seealso{

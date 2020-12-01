@@ -4,15 +4,17 @@
 #'
 #' @details
 #' \code{time_stats()} returns several point estimates, including means, geometric means (better when sample size <= 25), and medians (better for larger sample sizes). It also returns confidence interval information based on log-transformed values (for small samples) or raw (untransformed) data (for larger samples).
-#' * You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
-#' * If you're passing a data frame to \code{.x}, you can optionally include one or more grouping variables to compute stats by groups.
+#'  \itemize{
+#'  \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+#'  \item If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
+#'   }
 #'
 #' Note that \code{NAs} are automatically dropped in all calculations.
 #'
 #' @param .x  A vector or long-format data frame with a named column of numeric values corresponding to task or response times.
 #' @param .var If \code{x} is a data frame, the unquoted name of column containing the values to use in the computations.
 #' @param ... (Optional) If \code{x} is a data frame, the unquoted, comma-separated names of columns containing grouping variables.
-#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, or a 95\% confidence level.
+#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.
 #' @return A tibble with one or more means, confidence interval information, and other information.
 #' @family descriptive stats for UX measures
 #' @importFrom stats qt
@@ -20,7 +22,6 @@
 #' @importFrom stats median
 #' @importFrom dplyr n
 #' @importFrom dplyr group_by
-#' @importFrom dplyr ungroup
 #' @importFrom dplyr summarise
 #' @importFrom dplyr group_modify
 #' @examples
@@ -75,9 +76,9 @@ time_stats.numeric<-function(.x,...,.alpha = 0.05){
         "mean" = .m_raw,
         "median" = .median,
         "geom_mean" = .geo_m,
-        "ci_method" = paste0((1-.alpha)*100,"% CI using log-transformed data, based on the T distribution."),
         "ci_low" = exp(.m_trans -.me_trans),
         "ci_hi" = exp(.m_trans +.me_trans),
+        "ci_method" = paste0((1.0-.alpha)*100,"% CI using log-transformed data, based on the T distribution."),
          "stdev" = .sd_raw,
         "n" = .n,
         "t_z_crit" = .tcrit,
@@ -106,9 +107,9 @@ time_stats.numeric<-function(.x,...,.alpha = 0.05){
         "mean" = .m,
         "geom_mean" = .geo_m,
         "median" = .median,
-        "ci_method" = paste0((1-.alpha)*100,"% CI around the median using the binomial distribution method in Suaro and Lewis (2012)."),
         "ci_low" = .ci_low,
         "ci_hi" = .ci_hi,
+        "ci_method" = paste0((1.0-.alpha)*100,"% CI around the median using the binomial distribution method in Suaro and Lewis (2012)."),
         "n" = .n,
         "t_z_crit" = .zcrit,
         "stdev" = .stdev,

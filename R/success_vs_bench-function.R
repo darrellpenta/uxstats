@@ -1,12 +1,30 @@
 #' Compare a success rate to a benchmark
-#
-#' @param .x  The number of observed successes.
-#' @param .n  The total number of users.
-#' @param .p  The test proportion (must be a numeric between 0-1).
-#' @param ... (Optional) The unquoted, comma-separated names of columns containing grouping variables.
-#' @param .alt For alternatives, one of \code{c("greater","less","twotailed")}. Defaults to "greater" for a one-sided test.
-#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, corresponding to a 90\% confidence level for a one-sided test.
-#' @return A tibble with test results
+#'
+#' @description
+#' \code{success_vs_bench()} tests an observed success rate against a given benchmark. Following \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)}, it takes the sample size into account in providing estimates.
+#'
+#' \code{success_vs_bench()} and \code{completion_vs_bench()} are synonyms.
+#'
+#' @details
+#' \code{success_vs_bench()} returns a variety of estimates. \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} recommend using the mid-probability from the binomial distribution for small sample sizes (i.e., cases with fewer than 15 successes and 15 failures), and for large sample sizes, using the normal approximation to the binomial. The function also reports the best estimate success rate using the Laplace calculation.
+#'
+#' \code{success_vs_bench} assumes that you want to test the hypothesis that the observed outcome \emph{exceeds} the benchmark, and therefore, defaults to a one-tailed test. This means that setting \code{.alpha = 0.05} (the default) produces a 90\% confidence interval.
+#'
+#'  * If \code{.x} is a single numeric value representing the total number of successes, \code{.n} should be a single numeric value representing the total number of users, where the value of \code{.n} >= the value of \code{.x}). e.g., \code{.x = 23, .n = 25}
+#'  * If \code{.x} is a data frame, \code{.n} should be the unquoted name of the column containing the success data (as 1s and 0s).
+#'  * You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+#'  * If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names to \code{...} to compute stats by groups.
+#'
+#' Note that \code{NAs} are automatically dropped in all calculations.
+#'
+#'
+#' @param .x A single numeric value, a vector of values, or a long-format data frame with a named column of numeric data (1s and/or 0s) corresponding to task success outcomes. See Details.
+#' @param .n  A single numeric value representing the total number of trials, or the (unquoted) name of a data frame column. See Details.
+#' @param .p  The test (benchmark) proportion (must be a numeric between 0-1).
+#' @param ... If \code{.x} is a data frame, the unquoted, comma-separated names of columns containing grouping variables.
+#' @param .alt For test alternatives, one of \code{c("greater","less","twotailed")}. Defaults to "greater" for a one-sided test.
+#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.
+#' @return A tibble with data summaries and test results
 #' @family benchmark comparison stats
 #' @importFrom stats qnorm
 #' @importFrom stats pnorm
@@ -25,26 +43,51 @@
 success_vs_bench <- function(.x, ...) {
   UseMethod("success_vs_bench", .x)
 }
+#' @rdname success_vs_bench
+#' @export
+completion_vs_bench <- success_vs_bench
+#'
+#'
 
 #' @rdname success_vs_bench
 #' @export
 
-success_vs_bench.numeric<-function(.x,.n,.p,...,.alt=c("greater","less","twotailed"),.alpha=0.05){
+success_vs_bench.numeric<-function(.x,.n = NULL,.p,...,.alt=c("greater","less","twotailed"),.alpha=0.05){
  if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
  }
-  .alt<-match.arg(.alt)
+  if(length(.x)==1 && missing(.n)) {
+    stop(
+      "You need to specify .n as the total number of users (i.e., the sample size)."
+    )
+  }
+.alt<-match.arg(.alt)
   if(.alt == "greater"){
     .Z <- stats::qnorm((1.0 -.alpha))
+    .ci_note <- paste0((1.0 -(2*.alpha))*100,"% Adjusted Wald CI from a one-sided test")
   }
   else if(.alt == "less"){
     .Z <- stats::qnorm(.alpha)
+    .ci_note <- paste0((1.0 -(2*.alpha))*100,"% Adjusted Wald CI from a one-sided test")
   }
   else if(.alt == "twotailed"){
     .Z <- stats::qnorm(1.0 - (.alpha/2))
+    .ci_note <- paste0((1.0 -(.alpha))*100,"% Adjusted Wald CI from a two-sided test")
   }
   else {
     stop("Something went wrong. Did you provide the correct argument to .alt?")
+  }
+
+  if(length(.x) > 1){
+    if (any(.x >1,na.rm = TRUE)){
+      stop("If you're passing a vector of values, the vector should contain only 1s (for successes) and 0s (for failures).")
+    }
+    else{
+    .n <-
+      length(.x[!is.na(.x)])
+    .x <-
+      sum(.x, na.rm=TRUE)
+    }
   }
 
 if(.x >= 15 && (.n-.x) >= 15){
@@ -57,20 +100,24 @@ if(.x >= 15 && (.n-.x) >= 15){
       "pval_mid" = NA_integer_,
       "success_exact_prob" = 100 * stats::pnorm(  ((.x/.n) - .p)/sqrt((.p * (1-.p))/.n),lower.tail = TRUE),
       "success_mid_prob" = NA_integer_,
-      "best_estimate" = laplace(.x,.n) * 100,
-      "adjwald_ci_low" = adjwald_ci(.x,.n,.Z=.Z)[[1]]*100,
-      "adjwald_ci_hi" = adjwald_ci(.x,.n,.Z=.Z)[[2]]*100,
+      "success_best_estimate" = laplace(.x,.n) * 100,
+      "success_estimator" = c("Laplace"),
+      "ci_low" = adjwald_ci(.x,.n,.Z=.Z)[[1]]*100,
+      "ci_hi" = adjwald_ci(.x,.n,.Z=.Z)[[2]]*100,
+      "ci_method" = .ci_note,
       "method_note" = c("large sample"))
   .out
   }else{
 
   .out <-
     success_vs_bench_smallsample(.x=.x,.n=.n,.p=.p)
- .out$best_estimate <- laplace(.x,.n) * 100
- .out$adjwald_ci_low <- adjwald_ci(.x,.n,.Z=.Z)[[1]]*100
- .out$adjwald_ci_hi <- adjwald_ci(.x,.n,.Z=.Z)[[2]]*100
+ .out$success_best_estimate <- laplace(.x,.n) * 100
+ .out$success_estimator <- c("Laplace")
+ .out$ci_low <- adjwald_ci(.x,.n,.Z=.Z)[[1]]*100
+ .out$ci_hi <- adjwald_ci(.x,.n,.Z=.Z)[[2]]*100
+ .out$ci_method <- .ci_note
  .out$method_note <- c("small sample adjust")
-  .out
+  .out[,c(3,4,5,1,6,2,7:13)]
 }
 
 }
@@ -114,21 +161,22 @@ success_vs_bench_smallsample<-function(.x,.n,.p){
   .new$observed_success_pct <- (.x/.n)*100
   .new$success_exact_prob <- (100-(.new$pval_exact*100))
   .new$success_mid_prob <- (100-(.new$pval_mid*100))
-  return(.new[,c(3,4,5,1,2,6,7)])
+  return(.new)
 }
 
 
 #' @examples
+#' # Comparing 19 success/25 trials (users) to a 75% benchmark completion rate
+#' success_vs_bench(19,25,0.75)
 #'
-#' .uxdata <-
+#' .ux_data <-
 #' data.frame(
 #'  "id" = rep(seq(1,10,1),2),
-#'  "group" = rep(c("A","B"),10),
 #'  "task" = c(rep(1,10),rep(2,10)),
 #'  "complete"  = sample(0:1,20,replace=TRUE,prob = c(.3,.65))
 #' )
 #'
-#' success_vs_bench(.uxdata, complete, .p=0.7,group)
+#' success_vs_bench(.ux_data, complete, .p=0.7,task)
 #' @rdname success_vs_bench
 #' @export
 success_vs_bench.data.frame<-function(.x,.n,.p, ...,.alt=c("greater","less","twotailed"),.alpha=0.05){
@@ -151,6 +199,6 @@ success_vs_bench.data.frame<-function(.x,.n,.p, ...,.alt=c("greater","less","two
                                                 .alpha = .alpha),
                         .keep = TRUE)
 
-  return(.out)
+  return(.out[,c(1,4,5,6,2,7,3,8:14)])
 
 }

@@ -1,5 +1,5 @@
 #' Compare sample time to a benchmark
-#
+#'
 #' @param .x  The number of observed successes.
 #' @param .m  The benchmark mean.
 #' @param .sd  The sample standard deviation.

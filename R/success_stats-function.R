@@ -3,26 +3,26 @@
 #' @description
 #' \href{https://g.co/kgs/a7Zyyn}{Sauro and Lewis (2012)} describe various approaches for estimating success rates and generating confidence intervals when you're working with smaller sample sizes. \code{success_stats()} automatically determines which of several estimator adjustments is best suited to the data, and it returns a tibble with the original and adjusted success rates (as a percentage); a field to indicate which adjustment method was used; and information about the confidence interval.
 #'
-#' `success_stats()` and `completion_stats()` are synonyms.
+#' \code{success_stats()} and \code{completion_stats()} are synonyms.
 #'
 #' @details
-#'  * \code{.x} is the only required argument if you are passing a vector of 1s and 0s, representing successes and failures, respectively.  e.g., \code{.x <- c(1,1,1,1,1,0,1)}
-#'  * If \code{.x} is a single numeric value representing the total number of successes, \code{.y} should be a single numeric value representing the total number of trials (where the value of \code{.y} >= the value of \code{.x}). e.g., \code{.x = 23, .y = 25}
-#'  * If \code{.x} is a data frame, \code{.y} should be the unquoted name of the column containing the success data (as 1s and 0s).
-#'  * You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
-#'  * If you're passing a data frame to \code{.x}, you can optionally include one or more grouping variables to compute stats by groups.
+#' \itemize{
+#'   \item \code{.x} is the only required argument if you are passing a vector of 1s and 0s, representing successes and failures, respectively.  e.g., \code{.x = c(1,1,1,1,1,0,1)}
+#'  \item \code{.x} is a single numeric value representing the total number of successes, \code{.n} should be a single numeric value representing the total number of trials (where the value of \code{.y} >= the value of \code{.x}). e.g., \code{.x = 23, .y = 25}
+#'  \item \code{.x} is a data frame, \code{.var} should be the unquoted name of the column containing the success data (as 1s and 0s).
+#'  \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+#'  \item If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
+#' }
 #'
 #' Note that \code{NAs} are automatically dropped in all calculations.
 #'
 #'
-#' @param .x A single numeric value, a vector of values, or a long-format data frame with a named column of numeric data (1s and/or 0s) corresponding to task success outcomes.
+#' @param .x A single numeric value, a vector of values, or a long-format data frame with a named column of numeric data (1s and/or 0s) corresponding to task success outcomes. See Details.
 #' @return A tibble with success rate(s), confidence interval information, and other information. All percentage values in the output fall within the range of 0 and 100.
 #' @family descriptive stats for UX measures
 #' @importFrom stats qnorm
 #' @importFrom dplyr n
 #' @importFrom dplyr select
-#' @importFrom dplyr mutate
-#' @importFrom dplyr across
 #' @importFrom dplyr group_by
 #' @importFrom dplyr group_modify
 #' @importFrom dplyr summarise
@@ -37,13 +37,13 @@
 #' success_stats(c(1,1,1,1,0,0,1,1,0,1,0,1))
 #'
 #' # If you want a summary for a single task, you can provide the number
-#' # of successes and trials to .x and .y, respectively:
+#' # of successes and trials to .x and .n, respectively:
 #'
-#' success_stats(.x = 15, .y = 20)
+#' success_stats(.x = 15, .n = 20)
 #'
 #'
 #' # You can pass a long-format data frame to .x and
-#' # and specify the name of the appropriate column to .y:
+#' # and specify the name of the appropriate column to .var:
 #'
 #' .ux_data <-
 #'   data.frame(
@@ -58,7 +58,7 @@
 #'
 #' success_stats(.ux_data, task_success, group, task)
 #'
-#' # The alpha level defaults to .alpha=0.05. Change the value by
+#' # .alpha defaults to 0.05. Change the value by
 #' # naming the argument when you call the function:
 #'
 #' success_stats(15,20, .alpha = 0.01)
@@ -75,15 +75,14 @@ completion_stats <- success_stats
 #'
 #'
 #' @rdname success_stats
-#' @param .y A single numeric value or the (unquoted) name of a data frame column. See Details.
-#' @param ... (Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables here as unquoted, comma-separated column names.
-#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05.
+#' @param .n If \code{.x} is a single numeric value, \code{.n} should be a single numeric value representing the total number of trials. See Details.
+#' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.
 #' @export
 #'
-success_stats.numeric <- function(.x, .y = NULL, ..., .alpha = .05) {
-if(length(.x)==1 && missing(.y)) {
+success_stats.numeric <- function(.x, .n = NULL, ..., .alpha = .05) {
+if(length(.x)==1 && missing(.n)) {
     stop(
-      "You need to specify .y as the total number of trials."
+      "You need to specify .n as the total number of trials."
     )
   }
     if (.alpha < 0 | .alpha > 1) {
@@ -94,15 +93,15 @@ if(length(.x)==1 && missing(.y)) {
     }
 
   if(length(.x)== 1){
-  .p <- .x / .y
+  .p <- .x / .n
   } else if (any(.x >1,na.rm = TRUE)){
     stop("If you're passing a vector of values, the vector should contain only 1s (for successes) and 0s (for failures).")
   } else{
-    .y <-
+    .n <-
       length(.x[!is.na(.x)])
     .x <-
       sum(.x, na.rm=TRUE)
-    .p <- (.x/.y)
+    .p <- (.x/.n)
  }
 
     if (.p > 1) {
@@ -114,19 +113,19 @@ if(length(.x)==1 && missing(.y)) {
       stop()
     }
     else if (.p == 0) {
-      .pout <- laplace(.success = .x, .trials = .y)
+      .pout <- laplace(.success = .x, .trials = .n)
       .ci <-
         adjwald_ci(.success = .x,
-                .trials = .y,
+                .trials = .n,
                 .Z = .Z)
       .out <- list("=0", "Laplace", .pout, list(0, .ci[[2]]))
       .out
     }
     else if (.p == 1) {
-      .pout <- laplace(.success = .x, .trials = .y)
+      .pout <- laplace(.success = .x, .trials = .n)
       .ci <-
         adjwald_ci(.success = .x,
-                .trials = .y,
+                .trials = .n,
                 .Z = .Z)
       .out <- list("=1", "Laplace", .pout, list(.ci[[1]], 100))
       .out
@@ -134,31 +133,31 @@ if(length(.x)==1 && missing(.y)) {
     else if (.p < .5 && .p != 0) {
       .pout <-
         wilson(.success = .x,
-               .trials = .y,
+               .trials = .n,
                .Z = .Z)
       .ci <-
         adjwald_ci(.success = .x,
-                .trials = .y,
+                .trials = .n,
                 .Z = .Z)
       .out <- list("<.5", "Wilson", .pout, .ci)
       .out
     }
     else if (.p > .9 && .p != 0) {
       .pout <-
-        laplace(.success = .x, .trials = .y)
+        laplace(.success = .x, .trials = .n)
       .ci <-
         adjwald_ci(.success = .x,
-                .trials = .y,
+                .trials = .n,
                 .Z = .Z)
       .out <- list("<.9", "Laplace", .pout, .ci)
       .out
     }
     else {
       .pout <-
-        mle(.success = .x, .trials = .y)
+        mle(.success = .x, .trials = .n)
       .ci <-
         adjwald_ci(.success = .x,
-                .trials = .y,
+                .trials = .n,
                 .Z = .Z)
       .out <- list(".5<p<.9", "MLE", .pout, .ci)
       .out
@@ -166,13 +165,13 @@ if(length(.x)==1 && missing(.y)) {
     return(
       data.frame(
         "successes" = .x,
-        "trials" = .y,
+        "trials" = .n,
         "observed_success" = round(.p * 100, 2),
-        "estimator" = .out[[2]],
-        "estim_success" = round(.out[[3]] * 100, 2),
-        "ci_method" = paste0((1-.alpha)*100,"% CI based on Adjusted Wald"),
+        "estimated_success" = round(.out[[3]] * 100, 2),
+        "success_estimator" = .out[[2]],
         "ci_low" = round(.out[[4]][[1]] *100, 2),
         "ci_hi" =  round(.out[[4]][[2]] * 100, 2),
+        "ci_method" = paste0((1.0-.alpha)*100,"% CI based on Adjusted Wald"),
         stringsAsFactors = FALSE
       )
     )
@@ -180,9 +179,11 @@ if(length(.x)==1 && missing(.y)) {
 }
 
 #' @rdname success_stats
+#' @param .var If \code{.x} is a long-format data frame, the (unquoted) name of a data frame column containing task success outcomes (as 1s and 0s, corresponding to successes and failures, respectively).
+#' @param ... (Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables here as unquoted, comma-separated column names.
 #' @export
 #'
-success_stats.data.frame <- function(.x, .y, ..., .alpha = NULL) {
+success_stats.data.frame <- function(.x, .var, ..., .alpha = NULL) {
   if (missing(.alpha)) {
     .alpha <- 0.05
   }
@@ -194,19 +195,18 @@ success_stats.data.frame <- function(.x, .y, ..., .alpha = NULL) {
   }
   .out <-
     dplyr::group_by(.x, ...)
-  .out <-
-    dplyr::mutate(.out, dplyr::across({{ .y }}, as.numeric))
+
   .out <-
     dplyr::summarise(
       .out,
       trials = dplyr::n(),
-      success = sum({{ .y }}),
+      success = sum({{ .var }}),
       .groups = "keep"
     )
   .out <-
     dplyr::group_modify(.out,
                         ~ success_stats.numeric(.x$success,
-                                                  .y = .x$trials,
+                                                  .n = .x$trials,
                                                   .alpha = .alpha),
                         .keep = TRUE)
 
