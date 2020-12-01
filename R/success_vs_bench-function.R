@@ -10,18 +10,19 @@
 #'
 #' \code{success_vs_bench} assumes that you want to test the hypothesis that the observed outcome \emph{exceeds} the benchmark, and therefore, defaults to a one-tailed test. This means that setting \code{.alpha = 0.05} (the default) produces a 90\% confidence interval.
 #'
-#'  * If \code{.x} is a single numeric value representing the total number of successes, \code{.n} should be a single numeric value representing the total number of users, where the value of \code{.n} >= the value of \code{.x}). e.g., \code{.x = 23, .n = 25}
-#'  * If \code{.x} is a data frame, \code{.n} should be the unquoted name of the column containing the success data (as 1s and 0s).
-#'  * You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
-#'  * If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names to \code{...} to compute stats by groups.
+#' \itemize{
+#'   \item If \code{.x} is a single numeric value representing the total number of successes, \code{.n} should be a single numeric value representing the total number of users, where the value of \code{.n} >= the value of \code{.x}). e.g., \code{.x = 23, .n = 25}
+#'   \item If \code{.x} is a data frame, \code{.var} should be the unquoted name of the column containing the success data (as 1s and 0s).
+#'   \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+#'   \item If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
+#' }
 #'
 #' Note that \code{NAs} are automatically dropped in all calculations.
 #'
 #'
 #' @param .x A single numeric value, a vector of values, or a long-format data frame with a named column of numeric data (1s and/or 0s) corresponding to task success outcomes. See Details.
-#' @param .n  A single numeric value representing the total number of trials, or the (unquoted) name of a data frame column. See Details.
+#' @param .n  A single numeric value representing the total number of trials. See Details.
 #' @param .p  The test (benchmark) proportion (must be a numeric between 0-1).
-#' @param ... If \code{.x} is a data frame, the unquoted, comma-separated names of columns containing grouping variables.
 #' @param .alt For test alternatives, one of \code{c("greater","less","twotailed")}. Defaults to "greater" for a one-sided test.
 #' @param .alpha (Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.
 #' @return A tibble with data summaries and test results
@@ -54,7 +55,12 @@ completion_vs_bench <- success_vs_bench
 
 success_vs_bench.numeric<-function(.x,.n = NULL,.p,...,.alt=c("greater","less","twotailed"),.alpha=0.05){
  if (.alpha < 0 | .alpha > 1) {
-    stop(".alpha must be a positive integer between 0 and 1")
+    stop(".alpha must be a positive number between 0 and 1")
+ }
+ if(missing(.p)){
+   stop("You need to specify .p as the test (benchmark) proportion")
+ } else if (.p < 0 | .p > 1) {
+    stop(".p must be a positive number between 0 and 1")
  }
   if(length(.x)==1 && missing(.n)) {
     stop(
@@ -89,7 +95,11 @@ success_vs_bench.numeric<-function(.x,.n = NULL,.p,...,.alt=c("greater","less","
       sum(.x, na.rm=TRUE)
     }
   }
-
+if(.x > .n) {
+  stop(
+    "The value of .x is larger than the value of .n. Check your data."
+  )
+}
 if(.x >= 15 && (.n-.x) >= 15){
   .out<-
     data.frame(
@@ -178,15 +188,18 @@ success_vs_bench_smallsample<-function(.x,.n,.p){
 #'
 #' success_vs_bench(.ux_data, complete, .p=0.7,task)
 #' @rdname success_vs_bench
+#' @param .var If \code{.x} is a long-format data frame, the (unquoted) name of a data frame column containing task success outcomes (as 1s and 0s, corresponding to successes and failures, respectively).
+#' @param ... (Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
+
 #' @export
-success_vs_bench.data.frame<-function(.x,.n,.p, ...,.alt=c("greater","less","twotailed"),.alpha=0.05){
+success_vs_bench.data.frame<-function(.x,.var,.p, ...,.alt=c("greater","less","twotailed"),.alpha=0.05){
 
   .out <-
     dplyr::group_by(.x, ...)
   .out <-
     dplyr::summarise(
       .out,
-      successes = sum({{ .n }}),
+      successes = sum({{ .var }}),
       users = dplyr::n(),
       .groups = "keep")
 

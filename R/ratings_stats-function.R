@@ -14,7 +14,7 @@
 #'
 #' @param .x A vector of values, or a long-format data frame with a named column containing numeric ratings data.
 #' @param .var If \code{.x} is a data frame, the unquoted name of the data frame column containing the values to use in the computations.
-#' @param ... (Optional) If \code{.x} is a data frame, the unquoted, comma-separated names of columns containing grouping variables.
+#' @param ... (Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
 #' @return A tibble with one or more means, confidence interval information, and other information.
 #' @family descriptive stats for UX measures
 #' @importFrom stats qt

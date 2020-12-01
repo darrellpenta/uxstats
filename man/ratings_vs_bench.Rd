@@ -8,42 +8,68 @@
 \usage{
 ratings_vs_bench(.x, ...)
 
-\method{ratings_vs_bench}{numeric}(.x, .m, .sd, .n, ..., .alpha = 0.1)
-
-\method{ratings_vs_bench}{data.frame}(.x, .m, .var, ..., .alpha = 0.1)
-}
-\arguments{
-\item{.x}{The sample mean.}
-
-\item{...}{(Optional) The unquoted, comma-separated names of columns containing grouping variables.}
-
-\item{.m}{The benchmark mean.}
-
-\item{.sd}{The sample standard deviation.}
-
-\item{.n}{The sample size}
-
-\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the desired confidence level to be used. The argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results. If the argument is omitted, the default value is 0.05, corresponding to a 90\% confidence level for a one-sided test.}
-
-\item{.var}{The (unquoted) name of the column containing the ratings data.}
-}
-\value{
-A tibble with test results
-}
-\description{
-Compare ratings to a benchmark
-}
-\examples{
-
-.uxdata <-
-data.frame(
- "id" = rep(seq(1,10,1),2),
- "group" = rep(c("A","B"),10),
- "task" = c(rep(1,10),rep(2,10)),
- "ratings"  = runif(20,0,100)
+\method{ratings_vs_bench}{numeric}(
+  .x,
+  .sd,
+  .n,
+  .m,
+  ...,
+  .alt = c("greater", "less", "twotailed"),
+  .alpha = 0.05
 )
 
-ratings_vs_bench(.uxdata, .m=75, .var=ratings,group)
+\method{ratings_vs_bench}{data.frame}(.x, .var, .m, ..., .alt = "greater", .alpha = 0.05)
+}
+\arguments{
+\item{.x}{A single numeric value, a vector of values, or a long-format data frame with a named column of numeric data corresponding to ratings or another continuous metric. See Details.}
+
+\item{...}{(Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.}
+
+\item{.sd}{If \code{.x} is a single numeric value, \code{.sd} should be a single numeric value indicating the sample standard deviation. See Details}
+
+\item{.n}{If \code{.x} is a single numeric value, \code{.n} should be a single numeric value indicating the sample size. See Details.}
+
+\item{.m}{The test (benchmark) mean.}
+
+\item{.alt}{(Optional) For test alternatives, one of \code{c("greater","less","twotailed")}. Defaults to "greater" for a one-sided test.}
+
+\item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.}
+
+\item{.var}{If \code{.x} is a long-format data frame, the (unquoted) name of a data frame column containing task ratings (or values from another continuous metric).}
+}
+\value{
+A tibble with data summaries and test results
+}
+\description{
+\code{ratings_vs_bench()} tests a sample mean of continuous data (e.g., ratings)  against a given benchmark using a one-sample t-test.
+}
+\details{
+\code{ratings_vs_bench} assumes that you want to test the hypothesis that the observed outcome \emph{exceeds} the benchmark, and therefore, defaults to a one-tailed test. This means that setting \code{.alpha = 0.05} (the default) produces a 90\% confidence interval.
+
+\itemize{
+ \item If \code{.x} is a single numeric value representing the sample mean, provide the sample standard deviation and sample size to \code{.sd} and \code{.n}, respectively.
+ \item If \code{.x} is a numeric vector of ratings values, you should only specify the test (benchmark) mean.
+ \item If \code{.x} is a data frame, \code{.var} should be the unquoted name of the column containing the ratings values.
+ \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
+ \item If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
+}
+
+Note that \code{NAs} are automatically dropped in all calculations.
+}
+\examples{
+# Comparing a sample ratings mean of 79 (sd = 20) from 160 users
+# against a benchmark mean of 75
+ratings_vs_bench(.x=79,.sd=20,.n=160,.m=75)
+
+# Comparing values from a data frame against a benchmark of 70.
+.ux_data <-
+ data.frame(
+  "id" = rep(seq(1,10,1),2),
+  "task" = c(rep(1,10),rep(2,10)),
+  "ratings"  = runif(20,0,100))
+
+ratings_vs_bench(.ux_data, ratings, .m=70, task)
+
 }
 \seealso{
 Other benchmark comparison stats: 

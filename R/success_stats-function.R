@@ -8,8 +8,8 @@
 #' @details
 #' \itemize{
 #'   \item \code{.x} is the only required argument if you are passing a vector of 1s and 0s, representing successes and failures, respectively.  e.g., \code{.x = c(1,1,1,1,1,0,1)}
-#'  \item \code{.x} is a single numeric value representing the total number of successes, \code{.n} should be a single numeric value representing the total number of trials (where the value of \code{.y} >= the value of \code{.x}). e.g., \code{.x = 23, .y = 25}
-#'  \item \code{.x} is a data frame, \code{.var} should be the unquoted name of the column containing the success data (as 1s and 0s).
+#'  \item If \code{.x} is a single numeric value representing the total number of successes, \code{.n} should be a single numeric value representing the total number of trials (where the value of \code{.y} >= the value of \code{.x}). e.g., \code{.x = 23, .y = 25}
+#'  \item If \code{.x} is a data frame, \code{.var} should be the unquoted name of the column containing the success data (as 1s and 0s).
 #'  \item You can modify the alpha level to adjust confidence intervals by including \code{.alpha} as a named argument and providing a numeric value: e.g., \code{.aplha = 0.001}.
 #'  \item If you're passing a data frame to \code{.x}, you can optionally pass one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
 #' }
@@ -86,7 +86,7 @@ if(length(.x)==1 && missing(.n)) {
     )
   }
     if (.alpha < 0 | .alpha > 1) {
-      stop(".alpha must be a positive integer between 0 and 1")
+      stop(".alpha must be a positive number between 0 and 1")
     }
     else {
       .Z <- stats::qnorm(1.0 - (.alpha / 2))
@@ -180,7 +180,7 @@ if(length(.x)==1 && missing(.n)) {
 
 #' @rdname success_stats
 #' @param .var If \code{.x} is a long-format data frame, the (unquoted) name of a data frame column containing task success outcomes (as 1s and 0s, corresponding to successes and failures, respectively).
-#' @param ... (Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables here as unquoted, comma-separated column names.
+#' @param ... (Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
 #' @export
 #'
 success_stats.data.frame <- function(.x, .var, ..., .alpha = NULL) {

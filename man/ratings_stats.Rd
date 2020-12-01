@@ -15,7 +15,7 @@ ratings_stats(.x, ...)
 \arguments{
 \item{.x}{A vector of values, or a long-format data frame with a named column containing numeric ratings data.}
 
-\item{...}{(Optional) If \code{.x} is a data frame, the unquoted, comma-separated names of columns containing grouping variables.}
+\item{...}{(Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.}
 
 \item{.alpha}{(Optional) A positive number (where 0 < \code{.alpha} < 1) specifying the significance level to be used. Defaults to \code{.alpha = 0.05}. To set a different significance level, the argument must be named (i.e., \code{.alpha=0.001}) or else the function may yield unexpected results.}
 
