@@ -21,6 +21,7 @@ Computes confidence intervals using adjusted Wald (Agresti & Coull, 1998)
 }
 \seealso{
 Other point estimate helpers: 
-\code{\link{tdist_ci}()}
+\code{\link{tdist_ci}()},
+\code{\link{within_diff_ci}()}
 }
 \concept{point estimate helpers}

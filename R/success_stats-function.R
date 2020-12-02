@@ -179,16 +179,11 @@ if(length(.x)==1 && missing(.n)) {
 #' @param ... (Optional) If \code{.x} is a long-format data frame, you can pass the name of one or more grouping variables as unquoted, comma-separated column names (without naming the \code{...} argument) to compute stats by groups.
 #' @export
 #'
-success_stats.data.frame <- function(.x, .var, ..., .alpha = NULL) {
-  if (missing(.alpha)) {
-    .alpha <- 0.05
-  }
-  else if (.alpha < 0 | .alpha > 1) {
+success_stats.data.frame <- function(.x, .var, ..., .alpha = 0.05) {
+ if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
   }
-  else {
-    .alpha <- .alpha
-  }
+
   .out <-
     dplyr::group_by(.x, ...)
 

@@ -13,7 +13,7 @@ completion_stats(.x, ...)
 
 \method{success_stats}{numeric}(.x, .n = NULL, ..., .alpha = 0.05)
 
-\method{success_stats}{data.frame}(.x, .var, ..., .alpha = NULL)
+\method{success_stats}{data.frame}(.x, .var, ..., .alpha = 0.05)
 }
 \arguments{
 \item{.x}{A single numeric value, a vector of values, or a long-format data frame with a named column of numeric data (1s and/or 0s) corresponding to task success outcomes. See Details.}

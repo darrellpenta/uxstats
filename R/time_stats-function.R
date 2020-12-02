@@ -19,6 +19,8 @@
 #' @family descriptive stats for UX measures
 #' @importFrom stats qt sd median
 #' @importFrom dplyr n group_by summarise group_modify
+#' @include tinv-function.R
+#' @include tdist_ci-function.R
 #' @examples
 #' time_stats(c(40, 36, 53, 56, 110, 48, 34, 44, 30, 40, 80))
 #'
@@ -48,9 +50,7 @@ time_stats.numeric<-function(.x,...,.alpha = 0.05){
    if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
   }
-  else {
-    .p <- 1.0-(.alpha/2)
-  }
+
   if(length(.x) <= 25){
     .m_raw <- mean(.x, na.rm = TRUE)
     .m_trans <-mean(log(.x), na.rm = TRUE)
@@ -61,7 +61,7 @@ time_stats.numeric<-function(.x,...,.alpha = 0.05){
     .n <- length(.x)
     .stderr_raw <- (.sd_raw/sqrt(.n))
     .stderr_trans <- (.sd_trans/sqrt(.n))
-    .tcrit <- stats::qt(p=.p, df=(.n-1))
+    .tcrit <- tinv(.alpha, .df=(.n-1))
     .me_raw <- .tcrit * .stderr_raw
     .me_trans <- .tcrit * .stderr_trans
     .raw_trans <- "transformed (small n)"
@@ -71,9 +71,9 @@ time_stats.numeric<-function(.x,...,.alpha = 0.05){
         "mean" = .m_raw,
         "median" = .median,
         "geom_mean" = .geo_m,
-        "ci_low" = exp(.m_trans -.me_trans),
-        "ci_hi" = exp(.m_trans +.me_trans),
-        "ci_method" = paste0((1.0-.alpha)*100,"% CI using log-transformed data, based on the T distribution."),
+        "ci_low" = exp(tdist_ci(.m_trans, .sd_trans,.n,.tcrit,.return = "low")),
+        "ci_hi" = exp(tdist_ci(.m_trans, .sd_trans,.n,.tcrit,.return = "hi")),
+        "ci_method" = paste0((1.0-.alpha)*100,"% CI using the exponent of the log-transformed data, based on the T distribution."),
          "stdev" = .sd_raw,
         "n" = .n,
         "t_z_crit" = .tcrit,
@@ -87,7 +87,7 @@ time_stats.numeric<-function(.x,...,.alpha = 0.05){
     .geo_m <- exp(mean(log(.x),na.rm = TRUE))
     .median <- stats::median(.x, na.rm = TRUE)
     .n <- length(.x)
-    .zcrit <- stats::qnorm(p=.p)
+    .zcrit <- stats::qnorm(1.0-(.alpha/2))
     .stderr <-sqrt((.n*0.5) * 0.5)
     .me <- .zcrit * .stderr
     .ceil_low <- ceiling((.n * .5) - .me)
@@ -128,10 +128,10 @@ time_stats.data.frame <- function(.x,
 if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
   }
-  else {
-    .p <- 1.0-(.alpha/2)
-    .alpha2 <- .alpha
-  }
+  # else {
+  #   .p <- 1.0-(.alpha/2)
+  #   .alpha2 <- .alpha
+  # }
 
   .x<-
     dplyr::select(.x,`new_index` = {{ .var}}, tidyselect::everything())
@@ -139,7 +139,7 @@ if (.alpha < 0 | .alpha > 1) {
     dplyr::group_by(.x, ...)
   .out <-
     dplyr::group_modify(.x,
-                        ~ time_stats.numeric(.x$new_index, .alpha=.alpha2),
+                        ~ time_stats.numeric(.x$new_index, .alpha=.alpha),
                      .keep = TRUE)
 
 return(.out)

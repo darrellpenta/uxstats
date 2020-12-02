@@ -19,6 +19,8 @@
 #' @family descriptive stats for UX measures
 #' @importFrom stats qt sd median
 #' @importFrom dplyr n group_by summarise
+#' @include tinv-function.R
+#' @include tdist_ci-function.R
 
 #' @examples
 #'
@@ -56,21 +58,17 @@ ratings_stats.numeric<-function(.x,...,.alpha = 0.05,.limits=NULL){
 if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
   }
-  else {
-    .p <- 1.0-(.alpha/2)
-  }
+
   .m<-mean(.x, na.rm = TRUE)
   .sd<-stats::sd(.x, na.rm = TRUE)
   .n<-length(.x)
-  .stderr <- (.sd/sqrt(.n))
-  .tcrit <- stats::qt(p=.p, df=(.n-1))
-  .me <- .tcrit * .stderr
+  .tcrit <- tinv(.alpha, .df=(.n-1))
   .median <- stats::median(.x, na.rm = TRUE)
   .out<-
     data.frame(
       "mean" = .m,
-      "ci_low" = .m - .me,
-      "ci_hi" = .m + .me,
+      "ci_low" = tdist_ci(.m,.sd,.n,.tcrit,"low"),
+      "ci_hi" = tdist_ci(.m,.sd,.n,.tcrit,"hi"),
       "ci_method" = paste0((1.0-.alpha)*100,"% CI for continuous data, based on T distrib."),
       "stdev" = .sd,
       "n" = .n,
@@ -108,24 +106,29 @@ ratings_stats.data.frame <- function(.x,
  if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
   }
-  else {
-    .p <- 1.0-(.alpha/2)
-  }
+
   .out<-
     dplyr::group_by(.x, ...)
   .out<-
     dplyr::summarise(.out, mean = mean({{ .var }}, na.rm=TRUE),
               stdev = stats::sd({{ .var }}, na.rm = TRUE),
               median = stats::median({{ .var }}, na.rm = TRUE),
-              n = dplyr::n())
-  .out$stderr<- (.out$stdev/sqrt(.out$n))
-  .out$tcrit <- stats::qt(p=.p, df=(.out$n-1))
-  .out$me <- .out$tcrit * .out$stderr
-  .out$ci_low <- .out$mean - .out$me
-  .out$ci_hi <- .out$mean + .out$me
-  .out$ci_method <- paste0((1.0-.alpha)*100,"% CI for continuous data, based on T distrib.")
-  .out<-
-    dplyr::ungroup(.out)
+              n = dplyr::n(),
+              tcrit = tinv(.alpha, .df=(dplyr::n()-1)),
+              ci_low = tdist_ci(mean({{ .var }}, na.rm=TRUE),
+                                stats::sd({{ .var }},na.rm=TRUE),
+                                .n=dplyr::n(),
+                                tinv(.alpha, .df=(dplyr::n()-1)),
+                                .return = "low"),
+              ci_hi = tdist_ci(mean({{ .var }}, na.rm=TRUE),
+                                stats::sd({{ .var }},na.rm=TRUE),
+                                .n=dplyr::n(),
+                                tinv(.alpha, .df=(dplyr::n()-1)),
+                                .return = "hi"),
+              ci_method = paste0((1.0-.alpha)*100,"% CI for continuous data, based on T distrib."),
+              .groups="keep"
+              )
+
 
    if(missing(.limits)){return(.out)}
   else if(length(.limits) != 2){
