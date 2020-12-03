@@ -116,9 +116,13 @@ time_vs_bench.numeric <- function(.x,.sd,.n,.m,...,.alt = c("greater","less","tw
 
   .t_val<-(.m-.x)/(.sd/sqrt(.n))
    .p_val<-
-    pt(q = .t_val, df=(.n-1), lower.tail = FALSE)
+   #  pt(q = .t_val, df=(.n-1), lower.tail = FALSE)
+   # .t_crit <-
+   #   qt(.alpha, df=(.n-1), lower.tail = FALSE)
+     .prob<-
+     tdist(.t_val,.df=(.n-1),.tail=1)
    .t_crit <-
-     qt(.alpha, df=(.n-1), lower.tail = FALSE)
+     tinv(.alpha, .df=(.n-1), .tail = 1)
 
    .sample_ci_low <- tdist_ci(.sample_mean, .sample_sd, .n,.t_crit,.return = "low")
    .sample_ci_hi <- tdist_ci(.sample_mean, .sample_sd, .n,.t_crit,.return = "hi")

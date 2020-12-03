@@ -29,6 +29,9 @@
 #' @importFrom dplyr n group_by group_modify summarise
 #' @include adjwald_ci-function.R
 #' @include laplace-function.R
+#' @include tdist-function.R
+#' @include tinv-function.R
+#' @include tdist_ci-function.R
 #' @examples
 #' # Comparing a sample ratings mean of 79 (sd = 20) from 160 users
 #' # against a benchmark mean of 75
@@ -100,12 +103,11 @@ ratings_vs_bench.numeric <- function(.x,.sd,.n,.m,...,.alt = c("greater","less",
 .t_val <-
   (.x-.m)/(.sd/sqrt(.n))
 .prob<-
-  stats::pt(q = abs(.t_val), df=(.n-1), lower.tail = FALSE)
+  tdist(.t_val,.df=(.n-1),.tail=1)
 .t_crit <-
-  stats::qt(.alpha, df=(.n-1), lower.tail = FALSE)
-
-.ci_low <- .x-(.t_crit*(.sd/sqrt(.n)))
-.ci_hi <- .x+(.t_crit*(.sd/sqrt(.n)))
+  tinv(.alpha, .df=(.n-1), .tail = 1)
+# .ci_low <- .x-(.t_crit*(.sd/sqrt(.n)))
+# .ci_hi <- .x+(.t_crit*(.sd/sqrt(.n)))
 return(
   data.frame(
     "sample_mean" = .x,
@@ -114,8 +116,8 @@ return(
     "test_mean" = .m,
     "pval" = .prob,
     "critical_t" = .t_crit,
-    "ci_low" = .ci_low,
-    "ci_hi" = .ci_hi,
+    "ci_low" = tdist_ci(.x,.sd,.n,.t_crit,"low"),
+    "ci_hi" = tdist_ci(.x,.sd,.n,.t_crit,"hi"),
     "ci_method" = .ci_note
   ))
 }

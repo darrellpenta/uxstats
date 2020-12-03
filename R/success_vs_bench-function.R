@@ -34,6 +34,7 @@
 #' @importFrom tibble tibble
 #' @include adjwald_ci-function.R
 #' @include laplace-function.R
+#' @include binomdist-function.R
 
 #' @rdname success_vs_bench
 #' @export
@@ -109,8 +110,8 @@ if(.x >= 15 && (.n-.x) >= 15){
       "success_mid_prob" = NA_integer_,
       "success_best_estimate" = laplace(.x,.n) * 100,
       "success_estimator" = c("Laplace"),
-      "ci_low" = adjwald_ci(.x,.n,.Z=.Z)[[1]]*100,
-      "ci_hi" = adjwald_ci(.x,.n,.Z=.Z)[[2]]*100,
+      "ci_low" = adjwald_ci(.x,.n,.Z=.Z, .return="low")*100,
+      "ci_hi" = adjwald_ci(.x,.n,.Z=.Z, .return = "hi")*100,
       "ci_method" = .ci_note,
       "method_note" = c("large sample"))
   .out
@@ -144,10 +145,7 @@ success_vs_bench_smallsample<-function(.x,.n,.p){
     dplyr::bind_rows(
       apply(.new,1,
             function(.xx,.p_=.p){
-              .num<-factorial(.xx[2])
-              .denom<-factorial(.xx[1]) * factorial(.xx[2]-.xx[1])
-              .pval_exact<-(.num/.denom)*(.p_^.xx[1])*((1.0-.p_)^(.xx[2]-.xx[1]))
-
+      .pval_exact = binomdist(.xx[1],.xx[2],.p=.p_)
               return(
                 tibble::tibble(
                   "pval_exact" = .pval_exact)

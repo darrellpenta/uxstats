@@ -21,11 +21,9 @@ tinv <-
     stop(".df must be a numeric")
   }
   if(.a == 0){
-    stop(".p cannot be equal to zero")
+    stop(".a cannot be equal to zero")
   }
-  if(.tail != 1 &.tail!=2){
-    stop(".tail can only accept 1 (for a one-tailed T) or 2 (for a two-tailed T)")
-  }
+
     if(.tail==1){
     abs(stats::qt(.a, df=.df, ...))
   } else {

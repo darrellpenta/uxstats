@@ -15,8 +15,8 @@
 #' @export
 #'
 tdist <-
-  function(.p, .df, .tail=c(2,1)){
-    .tail <- match.arg(.tail)
+  function(.p, .df, .tail=2){
+
   if(!is.numeric(.p)){
     stop(".p must be a numeric")
   }
@@ -25,6 +25,9 @@ tdist <-
   }
   if(.p == 0){
     stop(".p cannot be equal to zero")
+  }
+  if(.tail <1 | .tail > 2){
+    stop(".tail must be `1` or `2`")
   }
  stats::pt(-abs(.p), .df) * .tail
   }

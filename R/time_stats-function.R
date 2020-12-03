@@ -128,10 +128,6 @@ time_stats.data.frame <- function(.x,
 if (.alpha < 0 | .alpha > 1) {
     stop(".alpha must be a positive integer between 0 and 1")
   }
-  # else {
-  #   .p <- 1.0-(.alpha/2)
-  #   .alpha2 <- .alpha
-  # }
 
   .x<-
     dplyr::select(.x,`new_index` = {{ .var}}, tidyselect::everything())

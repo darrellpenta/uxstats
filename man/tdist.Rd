@@ -4,7 +4,7 @@
 \alias{tdist}
 \title{Find a T-distribution probability}
 \usage{
-tdist(.p, .df, .tail = c(2, 1))
+tdist(.p, .df, .tail = 2)
 }
 \arguments{
 \item{.p}{The numeric probability associated with the two-tailed T-distribution. Must be greater than 0 and less than 1.}

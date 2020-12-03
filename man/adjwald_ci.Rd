@@ -4,7 +4,7 @@
 \alias{adjwald_ci}
 \title{Computes confidence intervals using adjusted Wald (Agresti & Coull, 1998)}
 \usage{
-adjwald_ci(.success, .trials, .Z = 1.959964)
+adjwald_ci(.success, .trials, .Z = 1.959964, .return = c("both", "low", "hi"))
 }
 \arguments{
 \item{.success}{the proportion of successes}
@@ -12,6 +12,8 @@ adjwald_ci(.success, .trials, .Z = 1.959964)
 \item{.trials}{the total number of trials}
 
 \item{.Z}{The Z score corresponding to the desired level of confidence}
+
+\item{.return}{One of \code{c("both","low","hi")}. Defaults to \code{both}, returning a list with the lower and upper limits.}
 }
 \value{
 a list with the lower and upper confidence limits (%) as numerics
