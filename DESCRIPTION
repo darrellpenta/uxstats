@@ -28,5 +28,5 @@ Collate:
     'time_stats-function.R'
     'time_vs_benchmark-function.R'
     'within_diff_ci-function.R'
-    'two_mean_test-function.R'
+    'two_means_test-function.R'
     'two_times_test-function.R'

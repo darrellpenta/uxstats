@@ -15,9 +15,9 @@ two_times_test(.x, ...)
 A tibble with the results of a test of two means, with confidence interval information, and other information.
 }
 \description{
-\code{two_mean_test()} compares to sample means and performs a two-sided statistical test to determine if the means differ from each other.
+\code{two_means_test()} compares to sample means and performs a two-sided statistical test to determine if the means differ from each other.
 
-\code{two_mean_test}, \code{ab_test}, and \code{two_times_test} are synonyms.
+\code{two_means_test}, \code{ab_test}, and \code{two_times_test} are synonyms.
 }
 \details{
 \itemize{
@@ -32,7 +32,7 @@ Note that \code{NAs} are automatically dropped in all calculations.
 }
 \examples{
 # When you have computed difference metrics in advance:
-two_mean_test(45,9.2,18)
+two_means_test(45,9.2,18)
 
 .ux_data <-
  data.frame(
@@ -42,5 +42,5 @@ two_mean_test(45,9.2,18)
   "score2"  = sample(1.5:7.5,40,TRUE)
   )
 
-two_mean_test(.ux_data, score1, score2, task, .alpha=0.1)
+two_means_test(.ux_data, score1, score2, task, .alpha=0.1)
 }
