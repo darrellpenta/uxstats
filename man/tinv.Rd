@@ -23,6 +23,7 @@ Equivalent to Excel's \code{TINV(x,df)} function.
 }
 \seealso{
 Other t-distribution functions (~ Excel): 
+\code{\link{between_df}()},
 \code{\link{tdist}()}
 }
 \concept{t-distribution functions (~ Excel)}

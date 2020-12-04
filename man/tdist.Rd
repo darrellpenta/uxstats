@@ -23,6 +23,7 @@ Similar to Excel's \code{TDIST(abs(x),df,tails)} function.
 }
 \seealso{
 Other t-distribution functions (~ Excel): 
+\code{\link{between_df}()},
 \code{\link{tinv}()}
 }
 \concept{t-distribution functions (~ Excel)}

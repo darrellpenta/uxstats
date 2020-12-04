@@ -18,7 +18,7 @@ within_diff_ci(.mean, .sd, .n, .alpha, .return = c("both", "low", "hi"))
 \item{.return}{One of \code{c("both","low","hi")}. Defaults to \code{both}, returning a list with the lower and upper limits}
 }
 \value{
-a list with the lower and upper confidence limits, or
+a list with the lower and upper confidence limits, or either limit if \code{.return} is specified.
 }
 \description{
 Computes confidence intervals on the difference of means for within-subjects tests
@@ -26,6 +26,7 @@ Computes confidence intervals on the difference of means for within-subjects tes
 \seealso{
 Other point estimate helpers: 
 \code{\link{adjwald_ci}()},
+\code{\link{between_diff_ci}()},
 \code{\link{tdist_ci}()}
 }
 \concept{point estimate helpers}

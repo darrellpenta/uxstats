@@ -13,6 +13,8 @@ LazyData: true
 RoxygenNote: 7.1.1
 Collate: 
     'adjwald_ci-function.R'
+    'between_df-function.R'
+    'between_diff_ci-function.R'
     'binomdist-function.R'
     'laplace-function.R'
     'mle-function.R'
@@ -25,8 +27,9 @@ Collate:
     'ratings_vs_bench-function.R'
     'success_stats-function.R'
     'success_vs_bench-function.R'
+    'test_means_between-function.R'
+    'within_diff_ci-function.R'
+    'test_means_within-function.R'
+    'test_times_within-function.R'
     'time_stats-function.R'
     'time_vs_benchmark-function.R'
-    'within_diff_ci-function.R'
-    'two_means_test-function.R'
-    'two_times_test-function.R'

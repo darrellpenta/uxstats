@@ -6,7 +6,7 @@
 #' @param .n The sample size
 #' @param .alpha the critical T value
 #' @param .return One of \code{c("both","low","hi")}. Defaults to \code{both}, returning a list with the lower and upper limits
-#' @return a list with the lower and upper confidence limits, or
+#' @return a list with the lower and upper confidence limits, or either limit if \code{.return} is specified.
 #' @family point estimate helpers
 #' @rdname within_diff_ci
 #' @export

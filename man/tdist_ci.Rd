@@ -26,6 +26,7 @@ Computes confidence intervals using the T distribution
 \seealso{
 Other point estimate helpers: 
 \code{\link{adjwald_ci}()},
+\code{\link{between_diff_ci}()},
 \code{\link{within_diff_ci}()}
 }
 \concept{point estimate helpers}
