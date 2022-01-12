@@ -166,7 +166,8 @@ if(length(.x)==1 && missing(.n)) {
         "estimated_success" = round(.out[[3]] * 100, 2),
         "success_estimator" = .out[[2]],
         "ci_low" = round(.out[[4]][[1]] *100, 2),
-        "ci_hi" =  round(.out[[4]][[2]] * 100, 2),
+        "ci_hi" =
+          ifelse(.out[[4]][[2]] == 100,100.00,round(.out[[4]][[2]] * 100, 2)),
         "ci_method" = paste0((1.0-.alpha)*100,"% CI based on Adjusted Wald"),
         stringsAsFactors = FALSE
       )

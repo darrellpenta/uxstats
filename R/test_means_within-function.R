@@ -78,7 +78,7 @@ test_means_within.numeric <- function(.x, .sd, .n, ..., .alpha = .05) {
     .p_val<-tdist(.t_val,.df = (.n-1),.tail=2)
     .ci_low <-within_diff_ci(.x, .sd, .n, .alpha, .return="low")
     .ci_hi <-within_diff_ci(.x, .sd, .n, .alpha, .return="hi")
-    .ci_note <- paste0((1.0 -(.alpha))*100,"% CI for a within-subjects difference in means")
+    .ci_note <- paste0((1.0 -(.alpha))*100,"% CI for difference of means for a within-subjects design")
 
     data.frame(
       "diff_mean" = .x,
