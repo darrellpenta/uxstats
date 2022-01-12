@@ -41,3 +41,4 @@ Collate:
     'test_times_within-function.R'
     'time_stats-function.R'
     'time_vs_benchmark-function.R'
+    'uxstats.R'

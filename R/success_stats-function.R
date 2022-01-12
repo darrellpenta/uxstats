@@ -88,9 +88,9 @@ if(length(.x)==1 && missing(.n)) {
       .Z <- stats::qnorm(1.0 - (.alpha / 2))
     }
 
-  if(length(.x)== 1){
+  if(length(.x) == 1){
   .p <- .x / .n
-  } else if (any(.x >1,na.rm = TRUE)){
+  } else if (any(.x > 1,na.rm = TRUE)){
     stop("If you're passing a vector of values, the vector should contain only 1s (for successes) and 0s (for failures).")
   } else{
     .n <-
@@ -123,7 +123,7 @@ if(length(.x)==1 && missing(.n)) {
         adjwald_ci(.success = .x,
                 .trials = .n,
                 .Z = .Z)
-      .out <- list("=1", "Laplace", .pout, list(.ci[[1]], 100))
+      .out <- list("=1", "Laplace", .pout, list(.ci[[1]], 1))
       .out
     }
     else if (.p < .5 && .p != 0) {
